@@ -1,0 +1,18 @@
+.navbar__items {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  height: 50px;
+  background-color: #ddd;
+}
+
+.navbar__items li {
+  color: purple;
+  cursor: pointer;
+  padding: 10px 10px;
+}
+
+.navbar__items li:hover {
+  background-color: rgb(157, 155, 155);
+}

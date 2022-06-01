@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  /* background-image: url('./images/appBackground.jpg'); */
+  background-color: #161617;
 }
 
 .App-logo {
@@ -26,6 +28,16 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.btn__link--white {
+  text-decoration: none;
+  color: white;
+}
+
+.btn__logo {
+  text-decoration: none;
+  color: #ed6c02;
 }
 
 @keyframes App-logo-spin {

@@ -9,20 +9,55 @@ import { DashboardPage } from './pages/DashboardPage';
 import PrivateRoute from './routes/PrivateRoute';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './material/theme';
-import { useAppSelector } from './app/hooks';
+import { useAppSelector, useAppDispatch } from './app/hooks';
 import {
   fetchAllMovies,
   selectAllMovies,
   selectMovieStatus,
 } from './features/movies/moviesSlice';
+import {
+  selectAuthUser,
+  selectAuthError,
+  selectLoginStatus,
+  updateLoginStatus,
+  updateUser,
+} from './features/auth/authSlice';
+// import { authListener } from './features/users/servicesFirebase';
 import { AuthProvider } from './hooks/useAuth';
 import './App.css';
 import './images/appBackground.jpg';
 import LoadingSpinner from './components/LoadingSpinner';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase/firebase';
+import { AppUser } from './shared/types';
 
 function App() {
+  const dispatch = useAppDispatch();
   const movieStatus = useAppSelector((state) => selectMovieStatus(state));
   const movieArray = useAppSelector((state) => selectAllMovies(state));
+
+  const error = useAppSelector((state) => selectAuthError(state));
+
+  // let auth listener run when the app is mounted
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const displayName = user?.displayName;
+      const email = user?.email;
+      const uid = user?.uid;
+      const photoURL = user?.photoURL;
+      //
+      if (user && !error) {
+        dispatch(updateUser({ displayName, email, uid, photoURL }));
+        dispatch(updateLoginStatus(true));
+      } else {
+        dispatch(updateUser(user));
+        dispatch(updateLoginStatus(false));
+      }
+    });
+
+    // cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   return (
     <BrowserRouter>

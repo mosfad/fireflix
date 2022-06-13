@@ -1,20 +1,13 @@
 import './NavBar.css';
-
-// export const NavBar = () => {
-//   return (
-//     <div>
-//       <ul className="navbar__items">
-//         <li>FireFlix</li>
-//         <li>Movies</li>
-//         <li>Sign up</li>
-//         <li>User Icon</li>
-//       </ul>
-//     </div>
-//   );
-// };
-
 import * as React from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import {
+  logoutUser,
+  selectAuthUser,
+  selectLoginStatus,
+} from '../features/auth/authSlice';
+import { resetLoggedoutUser } from '../features/users/usersSlice';
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -87,7 +80,10 @@ export function NavBar() {
   const [userMenuDisplay, setUserMenuDisplay] =
     React.useState<UserMenuDisplayProps>('none');
 
-  const auth = useAuth();
+  // const auth = useAuth();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => selectAuthUser(state));
+  const isLoggedin = useAppSelector((state) => selectLoginStatus(state));
 
   const navigate = useNavigate();
 
@@ -113,7 +109,9 @@ export function NavBar() {
 
   const handleLogoutClick = async (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
-    await auth?.logoutUser();
+    // await auth?.logoutUser();
+    await dispatch(resetLoggedoutUser());
+    await dispatch(logoutUser());
     navigate('/');
   };
 
@@ -193,7 +191,10 @@ export function NavBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar
+        position="fixed"
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Toolbar>
           <IconButton
             size="large"
@@ -225,7 +226,7 @@ export function NavBar() {
             />
           </Search>
           <Box sx={{ flexGrow: 1 }} />
-          {!auth?.user ? (
+          {!user ? (
             <Stack spacing={2} direction="row">
               <Button
                 component={RouterLink}

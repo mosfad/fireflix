@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import moviesReducer from '../features/movies/moviesSlice';
 import usersReducer from '../features/users/usersSlice';
+import authReducer from '../features/auth/authSlice';
 import {
   getLocalStore,
   deleteLocalStoreTimeExpires,
@@ -24,6 +25,7 @@ const store = configureStore({
     movies: moviesReducer,
     // shows: showsReducer,
     users: usersReducer,
+    auth: authReducer,
   },
   preloadedState: preloadedState(),
 });

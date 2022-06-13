@@ -1,5 +1,7 @@
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import { SideNavDashboard } from '../components/SideNavDashboard';
+import FavoriteMedia from '../components/FavoriteMedia';
 
 export const DashboardPage = () => {
   return (
@@ -10,18 +12,22 @@ export const DashboardPage = () => {
             sx={{
               height: '100vh',
               backgroundColor: 'white',
-              opacity: '.75',
+              opacity: '.95',
             }}
-          ></Box>
+          >
+            <SideNavDashboard />
+          </Box>
         </Grid>
         <Grid item xs={10}>
           <Box
             sx={{
               height: '100vh',
-              backgroundColor: '#ED6C02',
+              // backgroundColor: '#ED6C02',
               opacity: '.9',
             }}
-          ></Box>
+          >
+            <FavoriteMedia />
+          </Box>
         </Grid>
       </Grid>
     </div>

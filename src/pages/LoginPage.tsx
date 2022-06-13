@@ -33,9 +33,9 @@ export const LoginPage = () => {
           }}
         />
         <LoginForm
-          user={auth?.user}
-          authenticate={auth?.isAuthenticating}
-          signin={auth?.signinUser}
+        // user={auth?.user}
+        // authenticate={auth?.isAuthenticating}
+        // signin={auth?.signinUser}
         />
         {/* <LoginForm /> */}
       </Grid>

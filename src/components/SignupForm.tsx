@@ -14,8 +14,22 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import FilledInput from '@mui/material/FilledInput';
 import FormHelperText from '@mui/material/FormHelperText';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import { useAuth } from '../hooks/useAuth';
 import { valueToPercent } from '@mui/base';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import {
+  registerUser,
+  selectAuthUser,
+  updateProfileUser,
+  updateDisplayName,
+  selectAuthError,
+} from '../features/auth/authSlice';
+import { addUserDatabase, getUserDatabase } from '../features/users/usersSlice';
+import { Navigate, useNavigate } from 'react-router-dom';
+import type { ErrorProps } from '../shared/types';
+import { getUIErrorMessage, sleep } from '../shared/helpers';
 
 type SignupStateProps = {
   name: string;
@@ -27,6 +41,8 @@ type SignupStateProps = {
   hidePassword: boolean;
 };
 
+// type TimeDelayProp = number;
+
 const validationSchema = Yup.object({
   name: Yup.string().min(3).required('Name required on signup'),
   email: Yup.string().email().required('Email is required'),
@@ -36,32 +52,87 @@ const validationSchema = Yup.object({
 });
 
 export const SignupForm = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const error = useAppSelector((state) => selectAuthError(state));
+  const user = useAppSelector((state) => selectAuthUser(state));
+  const userId = user?.uid;
+  const email = user?.email;
+  const errorMessg = error?.message;
+
   const [hidePassword, setHidePassword] = useState<boolean>(true);
+  const [name, setName] = useState<string>('');
+  const [photoUrl, setPhotoUrl] = useState<string>('');
+
+  const [open, setOpen] = useState<boolean>(false);
 
   const handleVisibilityToggle = (e: MouseEvent<HTMLButtonElement>) => {
     setHidePassword((prevState) => !prevState);
   };
 
-  const auth = useAuth();
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  // const auth = useAuth();
+
+  useEffect(() => {
+    const setupNewUser = async () => {
+      if (userId && email && !errorMessg) {
+        console.log('New user has been added...');
+        // update profile
+        await dispatch(updateProfileUser({ name, photoUrl }));
+        // update display name
+        await dispatch(updateDisplayName(name));
+        // create user account in db
+        await dispatch(addUserDatabase({ name, email, uid: userId }));
+        // get user account from db
+        await dispatch(getUserDatabase(userId));
+        // to to user dashboard.
+        navigate('/dashboard', { replace: true });
+      }
+    };
+    setupNewUser();
+  }, [userId, email, errorMessg]);
 
   const formik = useFormik({
     initialValues: {
       name: '',
       email: '',
       password: '',
-      photoURL: '',
+      photoUrl: '',
       // hidePassword: true,
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      const user = await auth?.createUser(
-        values.email,
-        values.password,
-        values.name,
-        values.photoURL
-      );
-      console.log(auth?.user);
-      setSubmitting(false);
+      const { name, email, password, photoUrl } = values;
+      // const user = await auth?.createUser(
+      //   values.email,
+      //   values.password,
+      //   values.name,
+      //   values.photoURL
+      // );
+      // register
+      if (name && name !== '') setName(name);
+      if (photoUrl && photoUrl !== '') setPhotoUrl(photoUrl);
+      await dispatch(registerUser({ name, email, password }));
+      await sleep(300);
+      console.log(user);
+      console.log(user?.uid);
+      if (!user) {
+        console.log('User is not logged in!');
+        setOpen(true);
+      }
+      // console.log(auth?.user);
+      // setSubmitting(false);
       resetForm();
     },
   });
@@ -213,6 +284,24 @@ export const SignupForm = () => {
           Submit
         </Button>
       </div>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Alert
+          onClose={handleClose}
+          color="error"
+          severity="error"
+          sx={{ width: '100%' }}
+          variant="filled"
+        >
+          {error?.message
+            ? getUIErrorMessage(error)
+            : 'Invalid email or password!'}
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 };

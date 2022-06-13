@@ -74,7 +74,7 @@ export default function MovieList() {
     <ImageList
       gap={20}
       cols={6}
-      sx={{ padding: 4, width: '80%', height: '80%' }}
+      sx={{ padding: 4, marginTop: '4rem', height: '80%' }}
     >
       {movieArray.map((item: MovieProps) => (
         //console.log(item)

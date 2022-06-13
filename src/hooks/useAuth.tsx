@@ -1,5 +1,7 @@
 import { useState, useEffect, useContext, createContext } from 'react';
+
 import { auth, db } from '../firebase/firebase';
+import { FirebaseError } from 'firebase/app';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -23,6 +25,10 @@ import { date } from 'yup/lib/locale';
 // type User = {
 //   uid: string;
 // } | null; // **temporary fix!!!
+type ErrorProps = {
+  code: string;
+  message: string;
+};
 
 type AuthContextHook = {
   createUser: (
@@ -33,7 +39,7 @@ type AuthContextHook = {
   ) => Promise<void>;
   logoutUser: () => Promise<void>;
   isAuthenticating: boolean;
-  signinUser: (email: string, password: string) => Promise<void>;
+  signinUser: (email: string, password: string) => Promise<void | ErrorProps>;
   user: User | null; // should be type of User, which is unkown
 } | null;
 
@@ -76,8 +82,8 @@ const useAuthProvider = () => {
         createdAt: Timestamp.now(),
       });
     } catch (error) {
-      if (error instanceof Error) {
-        // const errorCode = error.code;
+      if (error instanceof FirebaseError) {
+        const errorCode = error.code;
         const errorMessage = error.message;
       }
     }
@@ -124,13 +130,19 @@ const useAuthProvider = () => {
   const signinUser = (email: string, password: string) => {
     return signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
+        console.log(userCredential);
         // User is signed in
         // ......setUser(userCredential.user);
         // return;
       })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
+      .catch((error): ErrorProps | undefined => {
+        if (error instanceof FirebaseError) {
+          console.error(error.code, error.message);
+          console.log(error.message);
+          return { code: error.code, message: error.message };
+          // const errorCode = error.code;
+          // const errorMessage = error.message;
+        }
       });
   };
 

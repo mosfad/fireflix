@@ -31,6 +31,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormLabel from '@mui/material/FormLabel';
 import RadioGroup from '@mui/material/RadioGroup';
 import Radio from '@mui/material/Radio';
+import BottomNavigation from '@mui/material/BottomNavigation';
 
 const drawerWidth = 240;
 
@@ -176,6 +177,15 @@ export const SideNavDashboard = () => {
         </Box>
         <Divider />
       </Box>
+      {/* <BottomNavigation // why does this element have a height of 0????
+        sx={{
+          position: 'absolute',
+          bottom: '0',
+          overflow: 'hidden',
+          backgroundColor: '#434343',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+      /> */}
     </Drawer>
   );
 };

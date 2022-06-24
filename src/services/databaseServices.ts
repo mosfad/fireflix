@@ -53,6 +53,7 @@ export const getUserDB = async (
 export const getUserFav = async (
   userId: string
 ): Promise<DocumentData | undefined> => {
+  console.log(userId);
   try {
     // let favsArr = [];
     const favsRef = collection(db, `users/${userId}/favorites`);
@@ -68,6 +69,11 @@ export const getUserFav = async (
     //   console.log(doc.id, ' => ', doc.data());
     // });
   } catch (error) {
-    console.log('Document does not exist');
+    if (error instanceof FirebaseError) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log({ code: errorCode, message: errorMessage });
+      return { code: errorCode, message: errorMessage };
+    }
   }
 };

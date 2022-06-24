@@ -1,4 +1,11 @@
-import { useState, useEffect, Fragment, useRef, MouseEvent } from 'react';
+import {
+  useState,
+  useEffect,
+  Fragment,
+  useRef,
+  useLayoutEffect,
+  MouseEvent,
+} from 'react';
 // import { MovieCard } from './MovieCard';
 import ImageList from '@mui/material/ImageList';
 // import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -19,8 +26,10 @@ import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 import Slide from '@mui/material/Slide';
-import './FavoriteMedia.css';
+import './Media.css';
+import { current } from '@reduxjs/toolkit';
 
 // utility function to handle type issues
 // with `Error`
@@ -42,11 +51,12 @@ type MoviePropsArray =
   | null;
 
 type SlideDirectionProps = 'left' | 'right' | 'up' | 'down' | undefined;
-type ArrowClickProps = 'left' | 'right';
+type ArrowClickProps = 'left' | 'right' | undefined;
 type ImageListPositionProps = number | null;
 
 export default function FavoriteMedia() {
   const imageRef = useRef<HTMLUListElement>(null);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const isLoggedin = useAppSelector((state) => selectLoginStatus(state));
   const user = useAppSelector((state) => selectAuthUser(state));
@@ -54,37 +64,80 @@ export default function FavoriteMedia() {
   const userId = user?.uid;
   //  const [url, setUrl] = useState(movieTrendingUrl);
   const [media, setMedia] = useState<MoviePropsArray | null>(null);
-  const [slide, setSlide] = useState<number>(0);
-  // const [frontPos, setFrontPos] = useState<ImageListPositionProps>(null);
-  // const [backPos, setBackPos] = useState<ImageListPositionProps>(null);
+  const [slide, setSlide] = useState<number>(1);
+  //
+  const [widthSlideContainer, setWidthSlideContainer] = useState<number>(0);
+  const [slideMoves, setSlideMoves] = useState<number>(1);
+  const [numOfSlides, setNumOfSlides] = useState<number | null>(null);
   const [posterWidth, setPosterWidth] = useState<number>(180);
-  //   const [slideDirection, setSlideDirection] =
-  //     useState<SlideDirectionProps>(undefined);
+  const [slideDirection, setSlideDirection] =
+    useState<ArrowClickProps>(undefined);
+
+  const moveSlides = (
+    listElemSlides: HTMLUListElement | null,
+    direction: SlideDirectionProps
+  ) => {
+    if (!listElemSlides || !direction || !numOfSlides) return;
+    if (direction === 'left') {
+      if (slide > slideMoves) {
+        setSlide((prevSlide) => prevSlide - slideMoves);
+      } else {
+        setSlide(1);
+      }
+    }
+    if (direction === 'right') {
+      if (numOfSlides - slide + 1 > slideMoves) {
+        setSlide((prevSlide) => prevSlide + slideMoves);
+      }
+    }
+  };
 
   const handleArrowClick = (
     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
     direction: ArrowClickProps
   ) => {
     const imageListElem = imageRef?.current;
-    let distance: null | number = null; // distance of image list from view port.
     if (imageListElem === null) return;
-    // distance = imageListElem.getBoundingClientRect().x;
-    // console.log(slide);
-    if (direction === 'left' && slide > 0) {
-      setSlide((prevSlide) => prevSlide - 1);
-      imageListElem.style.transform = `translateX(-${
-        (slide - 1) * posterWidth
-      }px)`;
+    setSlideDirection(direction);
+    moveSlides(imageListElem, direction);
+  };
+
+  useEffect(() => {
+    let imageListElem = imageRef?.current;
+    if (imageListElem && slideDirection === 'left') {
+      if (slide === 1) imageListElem.style.transform = `translateX(0)`;
+      else
+        imageListElem.style.transform = `translateX(-${
+          (slide - 1) * posterWidth
+        }px)`;
     }
-    if (direction === 'right' && slide < 9) {
-      setSlide((prevSlide) => prevSlide + 1);
-      imageListElem.style.transform = `translateX(-${
-        (slide + 1) * posterWidth
-      }px)`;
+
+    if (imageListElem && slideDirection === 'right') {
+      if (numOfSlides && slide <= numOfSlides)
+        imageListElem.style.transform = `translateX(-${
+          (slide - 1) * posterWidth
+        }px)`;
+    }
+  }, [slide, slideDirection, posterWidth, numOfSlides]);
+
+  const updateContainerAndSlide = () => {
+    let slideContainer = imageContainerRef?.current;
+    if (slideContainer) {
+      setWidthSlideContainer(slideContainer.clientWidth);
+      setSlideMoves(Math.trunc(widthSlideContainer / posterWidth));
     }
   };
 
-  // Us
+  useLayoutEffect(() => {
+    updateContainerAndSlide();
+  });
+
+  useLayoutEffect(() => {
+    window.addEventListener('resize', updateContainerAndSlide);
+    return () => {
+      window.removeEventListener('resize', updateContainerAndSlide);
+    };
+  }, []);
 
   // Use RTK to fetch data and comment out top line.
   useEffect(() => {
@@ -92,7 +145,10 @@ export default function FavoriteMedia() {
       if (userId) {
         let response: any = await getUserFav(userId);
         console.log(response);
-        if (typeof response !== 'undefined') setMedia(response);
+        if (typeof response !== 'undefined') {
+          setMedia(response);
+          setNumOfSlides(response.length);
+        }
       }
     };
     fetchFavorites();
@@ -104,7 +160,6 @@ export default function FavoriteMedia() {
     </div>
   ) : (
     <Fragment>
-      <Toolbar />
       <Box
         className="fav-menu"
         sx={{
@@ -112,9 +167,30 @@ export default function FavoriteMedia() {
           alignItems: 'center',
           overflowX: 'auto',
           position: 'relative',
-          padding: '2rem',
+          padding: '0 2rem ',
+          minHeight: '25rem',
+          marginBottom: '4rem',
         }}
+        ref={imageContainerRef}
       >
+        <Typography
+          align="left"
+          variant="subtitle1"
+          component="h3"
+          sx={{
+            color: 'white',
+            //padding: '2rem 2rem 2rem 0rem',
+            //marginBottom: '2rem',
+            fontFamily: 'Merriweather Sans, sans-serif',
+            fontWeight: '700',
+            fontSize: '2rem',
+            letterSpacing: '3px',
+            position: 'absolute',
+            top: '0',
+          }}
+        >
+          Favorite Movies
+        </Typography>
         <IconButton
           size="large"
           sx={{
@@ -131,7 +207,7 @@ export default function FavoriteMedia() {
         </IconButton>
 
         <ImageList
-          className="fav-menu"
+          className="fav-menu media-card__menu"
           component="ul"
           sx={{
             gridAutoFlow: 'column',
@@ -139,11 +215,11 @@ export default function FavoriteMedia() {
               'repeat(auto-fit, minmax(160px,1fr)) !important',
             gridAutoColumns: 'minmax(160px, 1fr)',
             gridTemplateRows: 'minmax(240px, 1fr)',
-            mt: 4,
-            mb: 4,
+            mt: 2,
+            mb: 2,
             overflowY: 'visible', // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
           }}
-          gap={20}
+          gap={32}
           rowHeight={4}
           //   cols={6}
           //   sx={{ padding: 4, marginTop: '4rem', height: '80%' }}
@@ -173,77 +249,3 @@ export default function FavoriteMedia() {
     </Fragment>
   );
 }
-
-// const itemData = [
-//   {
-//     img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
-//     title: 'Breakfast',
-//     author: '@bkristastucchio',
-//     rows: 2,
-//     cols: 2,
-//     featured: true,
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
-//     title: 'Burger',
-//     author: '@rollelflex_graphy726',
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
-//     title: 'Camera',
-//     author: '@helloimnik',
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c',
-//     title: 'Coffee',
-//     author: '@nolanissac',
-//     cols: 2,
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1533827432537-70133748f5c8',
-//     title: 'Hats',
-//     author: '@hjrc33',
-//     cols: 2,
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62',
-//     title: 'Honey',
-//     author: '@arwinneil',
-//     rows: 2,
-//     cols: 2,
-//     featured: true,
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1516802273409-68526ee1bdd6',
-//     title: 'Basketball',
-//     author: '@tjdragotta',
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1518756131217-31eb79b20e8f',
-//     title: 'Fern',
-//     author: '@katie_wasserman',
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1597645587822-e99fa5d45d25',
-//     title: 'Mushrooms',
-//     author: '@silverdalex',
-//     rows: 2,
-//     cols: 2,
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1567306301408-9b74779a11af',
-//     title: 'Tomato basil',
-//     author: '@shelleypauls',
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1471357674240-e1a485acb3e1',
-//     title: 'Sea star',
-//     author: '@peterlaster',
-//   },
-//   {
-//     img: 'https://images.unsplash.com/photo-1589118949245-7d38baf380d6',
-//     title: 'Bike',
-//     author: '@southside_customs',
-//     cols: 2,
-//   },
-// ];

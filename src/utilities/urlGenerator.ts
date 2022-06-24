@@ -9,5 +9,7 @@ export const movieTrendingUrl = () => {
 let posterPath =
   'https://www.themoviedb.org/t/p/w220_and_h330_face/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg';
 
-export const prependImagePath =
-  'https://www.themoviedb.org/t/p/w220_and_h330_face';
+// export const prependImagePath =
+//   'https://www.themoviedb.org/t/p/w220_and_h330_face';
+
+export const prependImagePath = 'https://www.themoviedb.org/t/p/w342';

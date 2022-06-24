@@ -2,6 +2,8 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import { SideNavDashboard } from '../components/SideNavDashboard';
 import FavoriteMedia from '../components/FavoriteMedia';
+import Typography from '@mui/material/Typography';
+import Toolbar from '@mui/material/Toolbar';
 
 export const DashboardPage = () => {
   return (
@@ -15,17 +17,23 @@ export const DashboardPage = () => {
               opacity: '.95',
             }}
           >
+            <Toolbar />
             <SideNavDashboard />
           </Box>
         </Grid>
         <Grid item xs={10}>
           <Box
             sx={{
-              height: '100vh',
+              // height: '100vh',
               // backgroundColor: '#ED6C02',
               opacity: '.9',
             }}
           >
+            <Toolbar />
+            <FavoriteMedia />
+            <FavoriteMedia />
+            <FavoriteMedia />
+            <FavoriteMedia />
             <FavoriteMedia />
           </Box>
         </Grid>

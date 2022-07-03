@@ -1,7 +1,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '../../app/store';
 import axios from 'axios';
-import { TMDBErrorProps } from '../../shared/types';
+import {
+  TMDBErrorProps,
+  MovieDetailsProps,
+  MediaProps,
+} from '../../shared/types';
 import { getLocalStore, saveLocalStore } from '../../utilities/localStorage';
 import { NumberSchema } from 'yup';
 import { mediaUrl } from '../../utilities/urlGenerator';
@@ -56,34 +60,14 @@ type VideoProps = {
   size: number;
 };
 
-// type is for result from TMDB not Firestore!!!
-type MediaProps = {
+type MoviesResponse = {
   id: number;
   title: string;
-  posterPath: string;
-  mediaType: 'movie' | 'tv' | 'all' | 'person';
-  originalLanguage?: string;
-  // genre: number[];
-  genre: string[]; // Get Details -> genres[].name
-  releaseDate: string;
-  summary: string;
-  language?: string;
-  logo?: string; // Get Images -> logo[] -> file_path
-  runtime: string; // Get Details -> runtime
-  backdropPath: string; // `width = 1920`
-  ratingsMedia: string; // Get Realease Dates -> iso_31661_1 === 'US' && relase_dates[0].certification.
-  popularity: number;
-  trailerYoutube: string; // Get Videos -> results[{ name: "official trailer", key: *trailer url}]
-  cast: CastProps[]; // Get Credits ->
-  voteAverage: number;
-  voteCount: number;
+  poster_path: string;
+  media_type: string;
 };
 
-interface MovieProps extends MediaProps {
-  mediaType: 'movie';
-}
-
-// type MovieProps = {
+// type Movie = {
 //   id: number;
 //   title: string;
 //   poster_path: string;
@@ -94,10 +78,10 @@ interface MovieProps extends MediaProps {
 //   vote_count: number;
 // } | null;
 
-//type MovieDataProps = MovieProps[];
+//type MovieDataProps = Movie[];
 
 interface MovieState {
-  movies: MovieProps[];
+  movies: MediaProps[];
   favorites: string[];
   status: 'idle' | 'pending' | 'suceeded' | 'failed';
   error: string | null;
@@ -123,17 +107,18 @@ export const fetchTrendingMovies = createAsyncThunk(
       const response = await axios.get(url);
       console.log(isErrorResponse(response));
       if (isErrorResponse(response)) return thunkAPI.rejectWithValue(response);
-      const movieIds: number[] = response.data.results.map(
-        (movie: { id: number }) => {
-          return movie.id;
+      const movies: MediaProps[] = response.data.results.map(
+        (movie: MoviesResponse) => {
+          const { id, title, poster_path, media_type } = movie;
+          return {
+            id,
+            title,
+            posterPath: poster_path,
+            mediaType: media_type,
+          };
         }
       );
-      console.log(movieIds);
-      movieIds.forEach((id) => {
-        let mediaDetailsUrl = mediaUrl('movie', id);
-        thunkAPI.dispatch(fetchMovieDetails(mediaDetailsUrl));
-      });
-      return movieIds;
+      return movies;
     } catch (err) {
       console.log(err);
       thunkAPI.rejectWithValue(err);
@@ -282,8 +267,9 @@ const moviesSlice = createSlice({
       .addCase(fetchTrendingMovies.pending, (state, action) => {
         state.status = 'pending';
       })
-      .addCase(fetchTrendingMovies.fulfilled, (state, action) => {
+      .addCase(fetchTrendingMovies.fulfilled, (state, action: any) => {
         state.status = 'suceeded';
+        state.movies = action.payload;
       })
       .addCase(fetchTrendingMovies.rejected, (state, action: any) => {
         state.status = 'failed';
@@ -383,7 +369,7 @@ export default moviesSlice.reducer;
 //   vote_count: number;
 // };
 
-// type MovieProps = {
+// type Movie = {
 //   id: number;
 //   title: string;
 //   poster_path: string;
@@ -394,7 +380,7 @@ export default moviesSlice.reducer;
 //   vote_count: number;
 // } | null;
 
-// type MovieDataProps = MovieProps[];
+// type MovieDataProps = Movie[];
 
 // interface MoviesState {
 //   movies: MovieDataProps;
@@ -458,3 +444,32 @@ export default moviesSlice.reducer;
 // export const selectMovieStatus = (state: RootState) => state.movies.status;
 
 // export default moviesSlice.reducer;
+
+// export const fetchTrendingMovies = createAsyncThunk(
+//   'movies/fetchTrendingMovies',
+//   async (url: string, thunkAPI) => {
+//     const isErrorResponse = (response: any): response is TMDBErrorProps => {
+//       console.log(response);
+//       return typeof response?.status_message === 'string';
+//     };
+//     try {
+//       const response = await axios.get(url);
+//       console.log(isErrorResponse(response));
+//       if (isErrorResponse(response)) return thunkAPI.rejectWithValue(response);
+//       const movieIds: number[] = response.data.results.map(
+//         (movie: { id: number }) => {
+//           return movie.id;
+//         }
+//       );
+//       console.log(movieIds);
+//       movieIds.forEach((id) => {
+//         let mediaDetailsUrl = mediaUrl('movie', id);
+//         thunkAPI.dispatch(fetchMovieDetails(mediaDetailsUrl));
+//       });
+//       return movieIds;
+//     } catch (err) {
+//       console.log(err);
+//       thunkAPI.rejectWithValue(err);
+//     }
+//   }
+// );

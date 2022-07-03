@@ -59,6 +59,13 @@ export type MediaProps = {
   title: string;
   posterPath: string;
   mediaType: 'movie' | 'tv' | 'all' | 'person';
+};
+
+export type MediaDetailsProps = {
+  id: number;
+  title: string;
+  posterPath: string;
+  mediaType: 'movie' | 'tv' | 'all' | 'person';
   originalLanguage?: string;
   // genre: number[];
   genre: string[]; // Get Details -> genres[].name
@@ -76,6 +83,6 @@ export type MediaProps = {
   voteCount: number;
 };
 
-export interface MovieProps extends MediaProps {
+export interface MovieDetailsProps extends MediaDetailsProps {
   mediaType: 'movie';
 }

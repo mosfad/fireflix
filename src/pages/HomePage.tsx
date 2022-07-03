@@ -1,7 +1,7 @@
 import MovieList from '../components/MovieList';
 import { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { movieTrendingUrl } from '../utilities/urlGenerator';
+import { mediaTrendingUrl } from '../utilities/urlGenerator';
 import Grid from '@mui/material/Grid';
 import axios from 'axios';
 

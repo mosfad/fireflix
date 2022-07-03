@@ -25,7 +25,7 @@ type MovieProps = {
   //   vote_count: number;
 } | null;
 
-export const FavoriteCard = ({ item }: { item: MovieProps }) => {
+export const MediaDetails = ({ item }: { item: MovieProps }) => {
   return (
     <ImageListItem className="media-card__item" sx={{ position: 'relative' }}>
       <img
@@ -75,29 +75,6 @@ export const FavoriteCard = ({ item }: { item: MovieProps }) => {
       >
         {item?.title}
       </Typography>
-      {/* <IconButton
-        className="media-card__btn--expand"
-        sx={{
-          color: 'white',
-          opacity: '.85',
-          position: 'relative',
-          bottom: '1rem',
-        }}
-      >
-        <ExpandCircleDownIcon sx={{ fontSize: '2rem' }} />
-      </IconButton> */}
-
-      {/* <ImageListItemBar
-        position="top"
-        sx={{ backgroundColor: 'transparent' }}
-        actionIcon={
-          <IconButton sx={{ color: 'white', opacity: '.85' }}>
-            <FavoriteIcon />
-          </IconButton>
-        }
-        actionPosition="right"
-      />
-      <ImageListItemBar className="media-card__item-bar" /> */}
     </ImageListItem>
   );
 };

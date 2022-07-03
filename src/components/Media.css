@@ -27,3 +27,8 @@
   left: 0 !important;
   bottom: 0 !important; */
 }
+
+.media-type__dropdown-btn {
+  position: absolute;
+  left: 50%;
+}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MovieCard } from './MovieCard';
 import ImageList from '@mui/material/ImageList';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { movieTrendingUrl } from '../utilities/urlGenerator';
+import { mediaTrendingUrl } from '../utilities/urlGenerator';
 import axios from 'axios';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
@@ -12,10 +12,11 @@ import InfoIcon from '@mui/icons-material/Info';
 import useFetch from '../hooks/useFetch';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import {
-  fetchAllMovies,
+  fetchTrendingMovies,
   selectAllMovies,
   selectMovieStatus,
 } from '../features/movies/moviesSlice';
+import { MovieProps } from '../shared/types';
 
 // utility function to handle type issues
 // with `Error`
@@ -23,16 +24,16 @@ function getErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   return String(error); //stringify error.
 }
-type MovieProps = {
-  id: number;
-  title: string;
-  poster_path: string;
-  media_type: string;
-  original_language: string;
-  release_date: string;
-  vote_average: number;
-  vote_count: number;
-} | null;
+// type MovieProps = {
+//   id: number;
+//   title: string;
+//   poster_path: string;
+//   media_type: string;
+//   original_language: string;
+//   release_date: string;
+//   vote_average: number;
+//   vote_count: number;
+// } | null;
 
 type MovieDataProps = MovieProps[] | null;
 
@@ -41,7 +42,9 @@ export default function MovieList() {
   const movieArray = useAppSelector((state) => selectAllMovies(state));
   const movieStatus = useAppSelector((state) => selectMovieStatus(state));
 
-  const [url, setUrl] = useState(movieTrendingUrl);
+  const [trendingUrl, setTrendingUrl] = useState<string>(() =>
+    mediaTrendingUrl('movie', 'day')
+  );
 
   // Use RTK to fetch data and comment out top line.
   useEffect(() => {
@@ -50,12 +53,13 @@ export default function MovieList() {
     if (movieArray.length === 0) {
       // console.log(movieArray);
       const fetchAndUpdate = async function () {
-        let results = await dispatch(fetchAllMovies(url));
+        console.log(trendingUrl);
+        let results = await dispatch(fetchTrendingMovies(trendingUrl));
         console.log(results);
       };
       fetchAndUpdate();
     }
-  }, [movieArray, url, dispatch]);
+  }, [movieArray, trendingUrl, dispatch]);
 
   return movieStatus === 'pending' ? (
     <div>
@@ -76,9 +80,9 @@ export default function MovieList() {
       cols={6}
       sx={{ padding: 4, marginTop: '4rem', height: '80%' }}
     >
-      {movieArray.map((item: MovieProps) => (
+      {movieArray.map((item: MovieProps, index) => (
         //console.log(item)
-        <MovieCard key={item?.id} item={item} />
+        <MovieCard key={index} item={item} />
       ))}
     </ImageList>
   );

@@ -2,12 +2,13 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Timestamp } from 'firebase/firestore';
 import type { RootState } from '../../app/store';
 import { addUserDB, getUserDB } from '../../services/databaseServices';
-import { ErrorProps } from '../../shared/types';
+import { ErrorProps, MediaTypeProps } from '../../shared/types';
 
 type UserState = {
   name: string | null;
   uid: string | null;
   email: string | null;
+  mediaSelected: MediaTypeProps;
   createdAt: Timestamp | number | null; //timestamp
   loading: 'idle' | 'pending' | 'suceeded' | 'failed';
   error?: string | null;
@@ -70,6 +71,7 @@ const initialState: UserState = {
   name: null,
   uid: null,
   email: null,
+  mediaSelected: 'movie',
   createdAt: null,
   loading: 'idle',
   error: null,
@@ -86,6 +88,9 @@ const usersSlice = createSlice({
       state.createdAt = null;
       state.loading = 'idle';
       state.error = null;
+    },
+    updateMediaTypeChosen: (state, action) => {
+      state.mediaSelected = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -132,11 +137,14 @@ const usersSlice = createSlice({
   },
 });
 
-export const { resetLoggedoutUser } = usersSlice.actions;
+export const { resetLoggedoutUser, updateMediaTypeChosen } = usersSlice.actions;
 export const selectUserName = (state: RootState) => state.users.name;
 
 export const selectUserEmail = (state: RootState) => state.users.email;
 
 export const selectUserId = (state: RootState) => state.users.uid;
+
+export const selectMediaTypeChosen = (state: RootState) =>
+  state.users.mediaSelected;
 
 export default usersSlice.reducer;

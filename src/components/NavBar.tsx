@@ -30,6 +30,7 @@ import MoreIcon from '@mui/icons-material/MoreVert';
 import { useAuth } from '../hooks/useAuth';
 import '../App.css';
 import Avatar from '@mui/material/Avatar';
+import { MediaTypeSelectButton } from './MediaTypeSelectButton';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -225,6 +226,7 @@ export function NavBar() {
               inputProps={{ 'aria-label': 'search' }}
             />
           </Search>
+          <MediaTypeSelectButton />
           <Box sx={{ flexGrow: 1 }} />
           {!user ? (
             <Stack spacing={2} direction="row">

@@ -11,7 +11,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './material/theme';
 import { useAppSelector, useAppDispatch } from './app/hooks';
 import {
-  fetchAllMovies,
+  fetchTrendingMovies,
   selectAllMovies,
   selectMovieStatus,
 } from './features/movies/moviesSlice';

@@ -9,7 +9,7 @@ import {
 // import { MovieCard } from './MovieCard';
 import ImageList from '@mui/material/ImageList';
 // import { useLocalStorage } from '../hooks/useLocalStorage';
-import { movieTrendingUrl } from '../utilities/urlGenerator';
+import { mediaTrendingUrl } from '../utilities/urlGenerator';
 import axios from 'axios';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
@@ -168,7 +168,7 @@ export default function FavoriteMedia() {
           overflowX: 'auto',
           position: 'relative',
           padding: '0 2rem ',
-          minHeight: '25rem',
+          minHeight: '26rem',
           marginBottom: '4rem',
         }}
         ref={imageContainerRef}

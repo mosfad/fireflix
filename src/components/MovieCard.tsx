@@ -6,6 +6,7 @@ import ImageListItemBar from '@mui/material/ImageListItemBar';
 import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
 import InfoIcon from '@mui/icons-material/Info';
+import { MovieProps } from '../shared/types';
 
 // type ItemProps = {
 //   img: string;
@@ -31,27 +32,29 @@ import InfoIcon from '@mui/icons-material/Info';
 //   item: ItemProps;
 // };
 
-type MovieProps = {
-  id: number;
-  title: string;
-  poster_path: string;
-  media_type: string;
-  original_language: string;
-  release_date: string;
-  vote_average: number;
-  vote_count: number;
-} | null;
+// type MovieProps = {
+//   id: number;
+//   title: string;
+//   poster_path: string;
+//   media_type: string;
+//   original_language: string;
+//   release_date: string;
+//   vote_average: number;
+//   vote_count: number;
+// } | null;
 
-type ItemProps = {
-  item: MovieProps;
-};
+// type ItemProps = {
+//   item: MovieProps;
+// };
 
-export const MovieCard = ({ item }: ItemProps) => {
+// export const MovieCard = ({ item }: ItemProps) => {
+
+export const MovieCard = ({ item }: { item: MovieProps }) => {
   return (
     <ImageListItem>
       <img
-        src={`${prependImagePath}${item?.poster_path}?w=248&fit=crop&auto=format`}
-        srcSet={`${prependImagePath}${item?.poster_path}?w=248&fit=crop&auto=format&dpr=2 2x`}
+        src={`${prependImagePath}${item?.posterPath}?w=248&fit=crop&auto=format`}
+        srcSet={`${prependImagePath}${item?.posterPath}?w=248&fit=crop&auto=format&dpr=2 2x`}
         alt={item?.title}
         loading="lazy"
         style={{ borderRadius: '1rem' }}

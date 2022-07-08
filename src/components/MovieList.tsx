@@ -25,6 +25,7 @@ import useFetch from '../hooks/useFetch';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import {
   fetchTrendingMovies,
+  // updateCurrentCategory,
   selectAllMovies,
   selectMovieStatus,
 } from '../features/movies/moviesSlice';
@@ -53,210 +54,212 @@ type SlideDirectionProps = 'left' | 'right' | 'up' | 'down' | undefined;
 type ArrowClickProps = 'left' | 'right' | undefined;
 
 export default function MovieList() {
-  const imageRef = useRef<HTMLUListElement>(null);
-  const imageContainerRef = useRef<HTMLDivElement>(null);
-
-  const dispatch = useAppDispatch();
-  const movieArray = useAppSelector((state) => selectAllMovies(state));
-  const movieStatus = useAppSelector((state) => selectMovieStatus(state));
-
-  const [trendingUrl, setTrendingUrl] = useState<string>(() =>
-    mediaTrendingUrl('movie', 'day')
-  );
-
-  // Repeated Code: Remember DRY!!!
-  const [media, setMedia] = useState<MediaProps[] | null>(null);
-  const [slide, setSlide] = useState<number>(1);
-  //
-  const [widthSlideContainer, setWidthSlideContainer] = useState<number>(0);
-  const [slideMoves, setSlideMoves] = useState<number>(1);
-  const [numOfSlides, setNumOfSlides] = useState<number | null>(null);
-  const [posterWidth, setPosterWidth] = useState<number>(180);
-  const [slideDirection, setSlideDirection] =
-    useState<ArrowClickProps>(undefined);
-
-  const moveSlides = (
-    listElemSlides: HTMLUListElement | null,
-    direction: SlideDirectionProps
-  ) => {
-    if (!listElemSlides || !direction || !numOfSlides) return;
-    if (direction === 'left') {
-      if (slide > slideMoves) {
-        setSlide((prevSlide) => prevSlide - slideMoves);
-      } else {
-        setSlide(1);
-      }
-    }
-    if (direction === 'right') {
-      if (numOfSlides - slide + 1 > slideMoves) {
-        setSlide((prevSlide) => prevSlide + slideMoves);
-      }
-    }
-  };
-
-  const handleArrowClick = (
-    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
-    direction: ArrowClickProps
-  ) => {
-    const imageListElem = imageRef?.current;
-    if (imageListElem === null) return;
-    setSlideDirection(direction);
-    moveSlides(imageListElem, direction);
-  };
-
-  useEffect(() => {
-    let imageListElem = imageRef?.current;
-    if (imageListElem && slideDirection === 'left') {
-      if (slide === 1) imageListElem.style.transform = `translateX(0)`;
-      else
-        imageListElem.style.transform = `translateX(-${
-          (slide - 1) * posterWidth
-        }px)`;
-    }
-
-    if (imageListElem && slideDirection === 'right') {
-      if (numOfSlides && slide <= numOfSlides)
-        imageListElem.style.transform = `translateX(-${
-          (slide - 1) * posterWidth
-        }px)`;
-    }
-  }, [slide, slideDirection, posterWidth, numOfSlides]);
-
-  const updateContainerAndSlide = () => {
-    let slideContainer = imageContainerRef?.current;
-    if (slideContainer) {
-      setWidthSlideContainer(slideContainer.clientWidth);
-      setSlideMoves(Math.trunc(widthSlideContainer / posterWidth));
-    }
-  };
-
-  useLayoutEffect(() => {
-    updateContainerAndSlide();
-  });
-
-  useLayoutEffect(() => {
-    window.addEventListener('resize', updateContainerAndSlide);
-    return () => {
-      window.removeEventListener('resize', updateContainerAndSlide);
-    };
-  }, []);
-  //========================
-
-  // Use RTK to fetch data and comment out top line.
-  useEffect(() => {
-    console.log(movieArray);
-    // fetch if no local storage
-    if (movieArray.length === 0) {
-      // console.log(movieArray);
-      const fetchAndUpdate = async function () {
-        console.log(trendingUrl);
-        let results: any = await dispatch(fetchTrendingMovies(trendingUrl)); // ???
-        console.log(results);
-        if (typeof results !== 'undefined') {
-          setMedia(results);
-          setNumOfSlides(results.length);
-        }
-      };
-      fetchAndUpdate();
-    }
-  }, [movieArray, trendingUrl, dispatch]);
-
-  return movieStatus === 'pending' ? (
-    <div>
-      <LoadingSpinner />
-    </div>
-  ) : (
-    <Fragment>
-      <Box
-        className="fav-menu"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          overflowX: 'auto',
-          position: 'relative',
-          padding: '0 2rem ',
-          minHeight: '26rem',
-          marginBottom: '4rem',
-          marginTop: '6rem', //
-        }}
-        ref={imageContainerRef}
-      >
-        <Typography
-          align="left"
-          variant="subtitle1"
-          component="h3"
-          sx={{
-            color: 'white',
-            //padding: '2rem 2rem 2rem 0rem',
-            //marginBottom: '2rem',
-            fontFamily: 'Merriweather Sans, sans-serif',
-            fontWeight: '700',
-            fontSize: '2rem',
-            letterSpacing: '3px',
-            position: 'absolute',
-            top: '0',
-          }}
-        >
-          Trending Movies
-        </Typography>
-        <IconButton
-          size="large"
-          sx={{
-            position: 'absolute',
-            left: '.25rem',
-            top: '50%',
-            transform: 'translate(25%, -50%)',
-            zIndex: '3000',
-            color: 'white',
-          }}
-          onClick={(e) => handleArrowClick(e, 'left')}
-        >
-          <ArrowCircleLeftIcon /*fontSize="large"*/ sx={{ fontSize: '3rem' }} />
-        </IconButton>
-
-        <ImageList
-          className="fav-menu media-card__menu"
-          component="ul"
-          sx={{
-            gridAutoFlow: 'column',
-            gridTemplateColumns:
-              'repeat(auto-fit, minmax(160px,1fr)) !important',
-            gridAutoColumns: 'minmax(160px, 1fr)',
-            gridTemplateRows: 'minmax(240px, 1fr)',
-            mt: 2,
-            mb: 2,
-            overflowY: 'visible', // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
-          }}
-          gap={32}
-          rowHeight={4}
-          //   cols={6}
-          //   sx={{ padding: 4, marginTop: '4rem', height: '80%' }}
-          ref={imageRef}
-        >
-          {movieArray.map((item: MediaProps, index) => (
-            //console.log(item)
-            <MovieCard key={index} item={item} />
-          ))}
-        </ImageList>
-
-        <IconButton
-          size="large"
-          sx={{
-            position: 'absolute',
-            right: '.25rem',
-            top: '50%',
-            transform: 'translate(-25%, -50%)',
-            zIndex: '3000',
-            color: 'white',
-          }}
-          onClick={(e) => handleArrowClick(e, 'right')}
-        >
-          <ArrowCircleRightIcon sx={{ fontSize: '3rem' }} />
-        </IconButton>
-      </Box>
-    </Fragment>
-  );
+  return <div></div>;
 }
+//   const imageRef = useRef<HTMLUListElement>(null);
+//   const imageContainerRef = useRef<HTMLDivElement>(null);
+
+//   const dispatch = useAppDispatch();
+//   const movieArray = useAppSelector((state) => selectAllMovies(state));
+//   const movieStatus = useAppSelector((state) => selectMovieStatus(state));
+
+//   const [trendingUrl, setTrendingUrl] = useState<string>(() =>
+//     mediaTrendingUrl('movie', 'day')
+//   );
+
+//   // Repeated Code: Remember DRY!!!
+//   const [media, setMedia] = useState<MediaProps[] | null>(null);
+//   const [slide, setSlide] = useState<number>(1);
+//   //
+//   const [widthSlideContainer, setWidthSlideContainer] = useState<number>(0);
+//   const [slideMoves, setSlideMoves] = useState<number>(1);
+//   const [numOfSlides, setNumOfSlides] = useState<number | null>(null);
+//   const [posterWidth, setPosterWidth] = useState<number>(180);
+//   const [slideDirection, setSlideDirection] =
+//     useState<ArrowClickProps>(undefined);
+
+//   const moveSlides = (
+//     listElemSlides: HTMLUListElement | null,
+//     direction: SlideDirectionProps
+//   ) => {
+//     if (!listElemSlides || !direction || !numOfSlides) return;
+//     if (direction === 'left') {
+//       if (slide > slideMoves) {
+//         setSlide((prevSlide) => prevSlide - slideMoves);
+//       } else {
+//         setSlide(1);
+//       }
+//     }
+//     if (direction === 'right') {
+//       if (numOfSlides - slide + 1 > slideMoves) {
+//         setSlide((prevSlide) => prevSlide + slideMoves);
+//       }
+//     }
+//   };
+
+//   const handleArrowClick = (
+//     e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>,
+//     direction: ArrowClickProps
+//   ) => {
+//     const imageListElem = imageRef?.current;
+//     if (imageListElem === null) return;
+//     setSlideDirection(direction);
+//     moveSlides(imageListElem, direction);
+//   };
+
+//   useEffect(() => {
+//     let imageListElem = imageRef?.current;
+//     if (imageListElem && slideDirection === 'left') {
+//       if (slide === 1) imageListElem.style.transform = `translateX(0)`;
+//       else
+//         imageListElem.style.transform = `translateX(-${
+//           (slide - 1) * posterWidth
+//         }px)`;
+//     }
+
+//     if (imageListElem && slideDirection === 'right') {
+//       if (numOfSlides && slide <= numOfSlides)
+//         imageListElem.style.transform = `translateX(-${
+//           (slide - 1) * posterWidth
+//         }px)`;
+//     }
+//   }, [slide, slideDirection, posterWidth, numOfSlides]);
+
+//   const updateContainerAndSlide = () => {
+//     let slideContainer = imageContainerRef?.current;
+//     if (slideContainer) {
+//       setWidthSlideContainer(slideContainer.clientWidth);
+//       setSlideMoves(Math.trunc(widthSlideContainer / posterWidth));
+//     }
+//   };
+
+//   useLayoutEffect(() => {
+//     updateContainerAndSlide();
+//   });
+
+//   useLayoutEffect(() => {
+//     window.addEventListener('resize', updateContainerAndSlide);
+//     return () => {
+//       window.removeEventListener('resize', updateContainerAndSlide);
+//     };
+//   }, []);
+//   //========================
+
+//   // Use RTK to fetch data and comment out top line.
+//   useEffect(() => {
+//     console.log(movieArray);
+//     // fetch if no local storage
+//     if (movieArray.length === 0) {
+//       // console.log(movieArray);
+//       const fetchAndUpdate = async function () {
+//         dispatch(updateCurrentCategory(trendingUrl));
+//         let results: any = await dispatch(fetchTrendingMovies(trendingUrl)); // ???
+//         console.log(results);
+//         if (typeof results !== 'undefined') {
+//           setMedia(results);
+//           setNumOfSlides(results.length);
+//         }
+//       };
+//       fetchAndUpdate();
+//     }
+//   }, [movieArray, trendingUrl, dispatch]);
+
+//   return movieStatus === 'pending' ? (
+//     <div>
+//       <LoadingSpinner />
+//     </div>
+//   ) : (
+//     <Fragment>
+//       <Box
+//         className="fav-menu"
+//         sx={{
+//           display: 'flex',
+//           alignItems: 'center',
+//           overflowX: 'auto',
+//           position: 'relative',
+//           padding: '0 2rem ',
+//           minHeight: '26rem',
+//           marginBottom: '4rem',
+//           // marginTop: '6rem', //
+//         }}
+//         ref={imageContainerRef}
+//       >
+//         <Typography
+//           align="left"
+//           variant="subtitle1"
+//           component="h3"
+//           sx={{
+//             color: 'white',
+//             //padding: '2rem 2rem 2rem 0rem',
+//             //marginBottom: '2rem',
+//             fontFamily: 'Merriweather Sans, sans-serif',
+//             fontWeight: '700',
+//             fontSize: '2rem',
+//             letterSpacing: '3px',
+//             position: 'absolute',
+//             top: '0',
+//           }}
+//         >
+//           Trending Movies
+//         </Typography>
+//         <IconButton
+//           size="large"
+//           sx={{
+//             position: 'absolute',
+//             left: '.25rem',
+//             top: '50%',
+//             transform: 'translate(25%, -50%)',
+//             zIndex: '3000',
+//             color: 'white',
+//           }}
+//           onClick={(e) => handleArrowClick(e, 'left')}
+//         >
+//           <ArrowCircleLeftIcon /*fontSize="large"*/ sx={{ fontSize: '3rem' }} />
+//         </IconButton>
+
+//         <ImageList
+//           className="fav-menu media-card__menu"
+//           component="ul"
+//           sx={{
+//             gridAutoFlow: 'column',
+//             gridTemplateColumns:
+//               'repeat(auto-fit, minmax(160px,1fr)) !important',
+//             gridAutoColumns: 'minmax(160px, 1fr)',
+//             gridTemplateRows: 'minmax(240px, 1fr)',
+//             mt: 2,
+//             mb: 2,
+//             overflowY: 'visible', // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
+//           }}
+//           gap={32}
+//           rowHeight={4}
+//           //   cols={6}
+//           //   sx={{ padding: 4, marginTop: '4rem', height: '80%' }}
+//           ref={imageRef}
+//         >
+//           {movieArray.map((item: MediaProps, index) => (
+//             //console.log(item)
+//             <MovieCard key={index} item={item} />
+//           ))}
+//         </ImageList>
+
+//         <IconButton
+//           size="large"
+//           sx={{
+//             position: 'absolute',
+//             right: '.25rem',
+//             top: '50%',
+//             transform: 'translate(-25%, -50%)',
+//             zIndex: '3000',
+//             color: 'white',
+//           }}
+//           onClick={(e) => handleArrowClick(e, 'right')}
+//         >
+//           <ArrowCircleRightIcon sx={{ fontSize: '3rem' }} />
+//         </IconButton>
+//       </Box>
+//     </Fragment>
+//   );
+// } ====================== End of <MovieList/>
 
 // // utility function to handle type issues
 // // with `Error`

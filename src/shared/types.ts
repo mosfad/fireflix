@@ -86,3 +86,5 @@ export type MediaDetailsProps = {
 export interface MovieDetailsProps extends MediaDetailsProps {
   mediaType: 'movie';
 }
+
+export type MediaCategories = 'trending' | 'popular' | 'upcoming';

@@ -29,7 +29,7 @@ const store = configureStore({
     auth: authReducer,
     people: peopleReducer,
   },
-  preloadedState: preloadedState(),
+  // preloadedState: preloadedState(),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

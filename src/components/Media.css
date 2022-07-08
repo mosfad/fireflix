@@ -2,7 +2,8 @@
   display: none;
 }
 
-.fav-item__image:hover {
+.fav-item__image:hover,
+.media-item__image:hover {
   transform: scale(1.1);
   /*border-radius: 1.5rem;*/
   position: relative;

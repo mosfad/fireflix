@@ -16,6 +16,7 @@ export const mediaUrl = (
   let url = `${baseUrl}/${pathParam}?api_key=f6d42c2d1af1e3290b133c7d6f7ee495&append_to_response=${queryParam}`;
   return url;
 };
+
 // Trending (day & week)
 export const mediaTrendingUrl = (
   mediaType: MediaTypeProps,
@@ -23,6 +24,27 @@ export const mediaTrendingUrl = (
 ): string => {
   const pathParam = `trending/${mediaType}/${timeWindow}`; // popular | trending/all/day | top-rated
   let url = `${baseUrl}/${pathParam}?api_key=f6d42c2d1af1e3290b133c7d6f7ee495`;
+  return url;
+};
+
+// Top rated (all time)
+export const mediaTopRatedUrl = (mediaType: MediaTypeProps): string => {
+  const pathParam = `${mediaType}/top_rated`; // popular | trending/all/day | top-rated
+  let url = `${baseUrl}/${pathParam}?api_key=f6d42c2d1af1e3290b133c7d6f7ee495&language=en-US&page=1`;
+  return url;
+};
+
+// Popular (updated daily)
+export const mediaPopularUrl = (mediaType: MediaTypeProps): string => {
+  const pathParam = `${mediaType}/popular`; // popular | trending/all/day | top-rated
+  let url = `${baseUrl}/${pathParam}?api_key=f6d42c2d1af1e3290b133c7d6f7ee495&language=en-US&page=1`;
+  return url;
+};
+
+// Upcoming (theaters)
+export const mediaUpcomingUrl = (mediaType: MediaTypeProps): string => {
+  const pathParam = `${mediaType}/upcoming`; // popular | trending/all/day | top-rated
+  let url = `${baseUrl}/${pathParam}?api_key=f6d42c2d1af1e3290b133c7d6f7ee495&language=en-US&page=1`;
   return url;
 };
 
@@ -76,12 +98,6 @@ export const imagesUrl = (
   let url = `${baseUrl}/${pathParam}?api_key=${API_KEY}&language=en-US&include_image_language=en,null`;
   return url;
 };
-
-// Top rated (all time)
-
-// Popular (updated daily)
-
-// Upcoming (theaters)
 
 // let posterPath = 'https://www.themoviedb.org/t/p/w220_and_h330_face/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg';
 

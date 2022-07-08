@@ -4,28 +4,14 @@ import axios from 'axios';
 import {
   TMDBErrorProps,
   MovieDetailsProps,
+  MediaCategories,
   MediaProps,
+  MediaDetailsProps,
 } from '../../shared/types';
 import { getLocalStore, saveLocalStore } from '../../utilities/localStorage';
 import { NumberSchema } from 'yup';
 import { mediaUrl } from '../../utilities/urlGenerator';
-// import { json } from 'stream/consumers';
 
-// returns movie results from local storage
-// const localStore = getLocalStore('movieResults')?.data?.results;
-
-// {
-//   condition: (url: string, { getState, extra }) => {
-//     const {
-//       movies: { movies },
-//     } = getState() as {
-//       movies: { movies: MovieDataProps };
-//     };
-
-//     if (!movies) return true;
-//     return false;
-//   },
-// }
 type GenreProps = {
   id: number;
   name: string;
@@ -67,45 +53,60 @@ type MoviesResponse = {
   media_type: string;
 };
 
-// type Movie = {
-//   id: number;
-//   title: string;
-//   poster_path: string;
-//   media_type: string;
-//   original_language: string;
-//   release_date: string;
-//   vote_average: number;
-//   vote_count: number;
-// } | null;
+type MediaCategoriesProps = {
+  trending: MediaProps[];
+  upcoming: MediaProps[];
+  popular: MediaProps[];
+  topRated: MediaProps[];
+};
 
-//type MovieDataProps = Movie[];
+// interface MovieState {
+//   movies: MediaCategoriesProps | null;
+//   currentCategory: 'trending' | 'popular' | 'upcoming' | 'none' ;
+//   favorites: string[];
+//   status: 'idle' | 'pending' | 'suceeded' | 'failed';
+//   error: string | null;
+// }
 
 interface MovieState {
-  movies: MediaProps[];
+  movies: {
+    trending: MediaProps[];
+    popular: MediaProps[];
+    upcoming: MediaProps[];
+    // topRated: MediaProps[];
+  };
+  moviesDetails: MediaDetailsProps[];
+  currentCategory: 'trending' | 'popular' | 'upcoming' | 'none';
   favorites: string[];
   status: 'idle' | 'pending' | 'suceeded' | 'failed';
   error: string | null;
 }
 
 const initialState: MovieState = {
-  movies: [],
+  movies: {
+    trending: [],
+    popular: [],
+    upcoming: [],
+    // topRated: [],
+  },
+  moviesDetails: [],
+  currentCategory: 'none',
   favorites: [],
   status: 'idle',
   error: null,
 };
 
-// Todo: fetch only ids of trending movies.....
-// fetch only ids -> for each id, get movie details***
+// Todo: fetch movies to display posters
 export const fetchTrendingMovies = createAsyncThunk(
   'movies/fetchTrendingMovies',
-  async (url: string, thunkAPI) => {
+  async (urlInfo: { url: string; category: MediaCategories }, thunkAPI) => {
     const isErrorResponse = (response: any): response is TMDBErrorProps => {
-      console.log(response);
+      //console.log(response);
       return typeof response?.status_message === 'string';
     };
     try {
-      const response = await axios.get(url);
-      console.log(isErrorResponse(response));
+      const response = await axios.get(urlInfo.url);
+      // console.log(isErrorResponse(response));
       if (isErrorResponse(response)) return thunkAPI.rejectWithValue(response);
       const movies: MediaProps[] = response.data.results.map(
         (movie: MoviesResponse) => {
@@ -118,7 +119,19 @@ export const fetchTrendingMovies = createAsyncThunk(
           };
         }
       );
-      return movies;
+      console.log(movies);
+      // let category = null;
+      // if (url.includes('trending')) category = 'trending';
+      // if (url.includes('popular')) category = 'popular';
+      // if (url.includes('upcoming')) category = 'upcoming';
+      // if (!category) return thunkAPI.rejectWithValue('Error with url');
+      console.log({
+        [urlInfo.category]: movies,
+      });
+      return {
+        category: urlInfo.category,
+        arrayMovies: movies,
+      };
     } catch (err) {
       console.log(err);
       thunkAPI.rejectWithValue(err);
@@ -217,18 +230,18 @@ export const fetchMovieDetails = createAsyncThunk(
     } catch (err) {
       console.log(err);
     }
-  },
-  {
-    condition: (url: string, { getState, extra }) => {
-      const { movies } = getState() as {
-        movies: MovieState;
-      };
-      console.log(movies);
-      console.log(typeof movies);
-      if (movies.movies.length === 0) return true;
-      return false;
-    },
   }
+  // {
+  //   condition: (url: string, { getState, extra }) => {
+  //     const { movies } = getState() as {
+  //       movies: MovieState;
+  //     };
+  //     console.log(movies);
+  //     console.log(typeof movies);
+  //     if (movies.movies === null) return true;
+  //     return false;
+  //   },
+  // }
 );
 
 const moviesSlice = createSlice({
@@ -250,6 +263,7 @@ const moviesSlice = createSlice({
       state.favorites.splice(movieIndex, 1);
     },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchMovieDetails.pending, (state, action) => {
@@ -258,7 +272,7 @@ const moviesSlice = createSlice({
       .addCase(fetchMovieDetails.fulfilled, (state, action: any) => {
         state.status = 'idle';
         // state.movies = [];
-        state.movies.push(action?.payload);
+        state.moviesDetails.push(action?.payload);
       })
       .addCase(fetchMovieDetails.rejected, (state, action) => {
         // state.status = 'failed';
@@ -269,7 +283,14 @@ const moviesSlice = createSlice({
       })
       .addCase(fetchTrendingMovies.fulfilled, (state, action: any) => {
         state.status = 'suceeded';
-        state.movies = action.payload;
+        if (state.movies)
+          state.movies[action.payload.category as MediaCategories] =
+            action.payload.arrayMovies;
+        // const key = Object.keys(action.payload)[0];
+        // console.log(key);
+        // console.log(action.payload);
+        // if (state.movies)
+        //   state.movies[key as MediaCategories] = action.payload[key];
       })
       .addCase(fetchTrendingMovies.rejected, (state, action: any) => {
         state.status = 'failed';

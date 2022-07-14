@@ -105,3 +105,19 @@ export const imagesUrl = (
 //   'https://www.themoviedb.org/t/p/w220_and_h330_face';
 
 // https://www.themoviedb.org/t/p/w500/w8LBnUgKpK6oiqw87gHSiHgGKRE.png
+
+// 🌟todo: create function that takes in media id and media name and returns
+// the appropriate url for media details
+export const mediaDetailsPageUrl = (
+  mediaTitle: string,
+  mediaId: number
+): string => {
+  const indexOfColon = mediaTitle.indexOf(':');
+  let titleWithoutColon =
+    indexOfColon === -1
+      ? mediaTitle
+      : mediaTitle.slice(0, indexOfColon) + mediaTitle.slice(indexOfColon + 1);
+  let formatTitle = titleWithoutColon.split(' ').join('-');
+  console.log(formatTitle);
+  return `/${formatTitle}/${mediaId}`;
+};

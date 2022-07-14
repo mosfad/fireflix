@@ -1,7 +1,17 @@
 import { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import {
+  logoutUser,
+  selectAuthUser,
+  selectLoginStatus,
+} from '../features/auth/authSlice';
+import { updateMovieSelected } from '../features/movies/moviesSlice';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import { prependImagePath } from '../utilities/urlGenerator';
+import {
+  prependImagePath,
+  mediaDetailsPageUrl,
+} from '../utilities/urlGenerator';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
@@ -13,6 +23,7 @@ import Typography from '@mui/material/Typography';
 import { MediaProps } from '../shared/types';
 import './Media.css';
 import { MediaDialog } from './MediaDialog';
+import { useNavigate } from 'react-router-dom';
 // type ItemProps = {
 //   img: string;
 //   title: string;
@@ -55,6 +66,9 @@ import { MediaDialog } from './MediaDialog';
 // export const MovieCard = ({ item }: ItemProps) => {
 
 export const MediaCard = ({ item }: { item: MediaProps }) => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => selectAuthUser(state));
   const [open, setOpen] = useState(false);
   const [actionBtn, setActionBtn] = useState('none');
 
@@ -63,11 +77,20 @@ export const MediaCard = ({ item }: { item: MediaProps }) => {
   //   };
 
   const handleFavIconClick = () => {
+    // todo: Add media to favorites if `user` is logged in.
     setOpen(true);
     setActionBtn('favorite');
   };
 
   const handleMoreIconClick = () => {
+    // todo: Display media details if `user` is logged in.
+    // console.log(user);
+    if (user) {
+      // update current movie selected
+      dispatch(updateMovieSelected(item.id));
+      navigate(mediaDetailsPageUrl(item.title, item.id), { replace: true });
+    }
+
     setOpen(true);
     setActionBtn('more');
   };

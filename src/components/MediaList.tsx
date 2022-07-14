@@ -139,9 +139,9 @@ export default function MediaList({
     listElemSlides: HTMLUListElement | null,
     direction: SlideDirectionProps
   ) => {
-    console.log(direction);
-    console.log(numOfSlides); // main problems****
-    console.log(listElemSlides);
+    // console.log(direction);
+    // console.log(numOfSlides); // main problems****
+    // console.log(listElemSlides);
     if (!listElemSlides || !direction || !numOfSlides) return;
     if (direction === 'left') {
       if (slide > slideMoves) {
@@ -174,11 +174,12 @@ export default function MediaList({
     // console.log(imageRef);
     // console.log(imageListElem);
     if (imageListElem === null) return;
-    console.log('Setting slide moves and direction.....');
+    // console.log('Setting slide moves and direction.....');
     setSlideDirection(direction);
     moveSlides(imageListElem, direction);
   };
 
+  // Do I need this `useEffect`????
   useEffect(() => {
     console.log(imageRef);
   }, []);
@@ -186,8 +187,8 @@ export default function MediaList({
   useEffect(() => {
     let imageListElem = imageRef?.current;
     if (imageListElem && slideDirection === 'left') {
-      console.log('Sliding left.....');
-      console.log(slide);
+      //console.log('Sliding left.....');
+      // console.log(slide);
       if (slide === 1) imageListElem.style.transform = `translateX(0)`;
       else
         imageListElem.style.transform = `translateX(-${
@@ -196,9 +197,9 @@ export default function MediaList({
     }
 
     if (imageListElem && slideDirection === 'right') {
-      console.log('Sliding right....');
-      console.log(slide);
-      console.log(numOfSlides);
+      //console.log('Sliding right....');
+      // console.log(slide);
+      // console.log(numOfSlides);
       if (numOfSlides && slide <= numOfSlides)
         imageListElem.style.transform = `translateX(-${
           (slide - 1) * posterWidthTotal
@@ -216,8 +217,8 @@ export default function MediaList({
 
   useLayoutEffect(() => {
     updateContainerAndSlide();
-    console.log(widthSlideContainer);
-    console.log(slideMoves);
+    // console.log(widthSlideContainer);
+    // console.log(slideMoves);
   });
 
   useLayoutEffect(() => {
@@ -249,7 +250,7 @@ export default function MediaList({
       // This will prevent unnecessary renders
       // console.log(mediaArray);
       const fetchAndUpdate = async function () {
-        console.log(mediaReqUrl);
+        // console.log(mediaReqUrl);
         // dispatch(updateCurrentCategory(mediaReqUrl));
 
         let results: any = await dispatch(
@@ -258,7 +259,7 @@ export default function MediaList({
             category: categoryName as MediaCategories,
           })
         ); // ???
-        console.log(results);
+        // console.log(results);
         // if (typeof results !== 'undefined') {
         //   setMedia(results?.arrayMovies);
         //   setNumOfSlides(results?.arrayMovies?.length);
@@ -282,9 +283,9 @@ export default function MediaList({
           overflowX: 'auto',
           position: 'relative',
           padding: '0 2rem ',
-          minHeight: '26rem',
+          minHeight: '29rem',
           marginBottom: '4rem',
-          marginTop: '6rem', //
+          marginTop: '0.5rem', //
         }}
         ref={imageContainerRef}
       >

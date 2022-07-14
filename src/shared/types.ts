@@ -25,13 +25,11 @@ type GenreProps = {
   name: string;
 };
 
-type CastProps = {
+export type ActorProps = {
   id: number;
   name: string;
-  profile_path: string;
+  profilePath: string;
   character: string;
-  known_for_department: string;
-  order: number;
 };
 
 type CountryRatingsProp = {
@@ -65,6 +63,7 @@ export type MediaDetailsProps = {
   id: number;
   title: string;
   posterPath: string;
+  backdropPath: string; // `width = 1920`
   mediaType: 'movie' | 'tv' | 'all' | 'person';
   originalLanguage?: string;
   // genre: number[];
@@ -74,11 +73,10 @@ export type MediaDetailsProps = {
   language?: string;
   logo?: string; // Get Images -> logo[] -> file_path
   runtime: string; // Get Details -> runtime
-  backdropPath: string; // `width = 1920`
   ratingsMedia: string; // Get Realease Dates -> iso_31661_1 === 'US' && relase_dates[0].certification.
   popularity: number;
-  trailerYoutube: string; // Get Videos -> results[{ name: "official trailer", key: *trailer url}]
-  cast: CastProps[]; // Get Credits ->
+  trailer: string; // Get Videos -> results[{ name: "official trailer", key: *trailer url}]
+  actors: ActorProps[]; // Get Credits ->
   voteAverage: number;
   voteCount: number;
 };
@@ -88,3 +86,6 @@ export interface MovieDetailsProps extends MediaDetailsProps {
 }
 
 export type MediaCategories = 'trending' | 'popular' | 'upcoming';
+
+export type SlideDirectionProps = 'left' | 'right' | 'up' | 'down' | undefined;
+export type ArrowClickProps = 'left' | 'right' | undefined;

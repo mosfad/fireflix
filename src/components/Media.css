@@ -1,4 +1,5 @@
-.fav-menu::-webkit-scrollbar {
+.fav-menu::-webkit-scrollbar,
+.media-menu__container::-webkit-scrollbar {
   display: none;
 }
 

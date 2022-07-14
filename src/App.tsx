@@ -30,6 +30,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/firebase';
 import { AppUser } from './shared/types';
+import { MediaDetailsPage } from './pages/MediaDetailsPage';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -75,6 +76,14 @@ function App() {
                 element={
                   <PrivateRoute>
                     <DashboardPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/:mediaTitle/:mediaId"
+                element={
+                  <PrivateRoute>
+                    <MediaDetailsPage />
                   </PrivateRoute>
                 }
               />

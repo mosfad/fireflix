@@ -7,10 +7,12 @@ import {
   MediaCategories,
   MediaProps,
   MediaDetailsProps,
+  ActorProps,
 } from '../../shared/types';
 import { getLocalStore, saveLocalStore } from '../../utilities/localStorage';
 import { NumberSchema } from 'yup';
 import { mediaUrl } from '../../utilities/urlGenerator';
+import { Root } from 'react-dom/client';
 
 type GenreProps = {
   id: number;
@@ -75,8 +77,8 @@ interface MovieState {
     upcoming: MediaProps[];
     // topRated: MediaProps[];
   };
-  moviesDetails: MediaDetailsProps[];
-  currentCategory: 'trending' | 'popular' | 'upcoming' | 'none';
+  moviesDetails: { [key: string]: MediaDetailsProps }[];
+  currentMovieSelected: number | null;
   favorites: string[];
   status: 'idle' | 'pending' | 'suceeded' | 'failed';
   error: string | null;
@@ -90,7 +92,7 @@ const initialState: MovieState = {
     // topRated: [],
   },
   moviesDetails: [],
-  currentCategory: 'none',
+  currentMovieSelected: null,
   favorites: [],
   status: 'idle',
   error: null,
@@ -151,7 +153,7 @@ export const fetchMovieDetails = createAsyncThunk(
       const response = await axios.get(url);
       if (isErrorResponse(response)) return thunkAPI.rejectWithValue(response);
       // destructure & assign variables new names
-      console.log(response);
+      // console.log(response);
       const results = response.data; // An object
       const {
         id,
@@ -177,7 +179,7 @@ export const fetchMovieDetails = createAsyncThunk(
           return Object.values(country).includes('US'); // why didn't `country.iso_3166_1 === 'US'` work?????...........
         });
       console.log(countryRatings);
-      const ratingsMedia = countryRatings.release_dates[0].certification; // Tricky!!!!
+      const ratingsMedia = countryRatings?.release_dates[0]?.certification; // Tricky!!!!
 
       const trailerObj: VideoProps = results.videos.results.find(
         (videoObj: VideoProps) =>
@@ -185,22 +187,23 @@ export const fetchMovieDetails = createAsyncThunk(
           videoObj.type === 'Trailer' &&
           videoObj.site === 'YouTube'
       );
-      const trailer = trailerObj.key;
+      const trailer = trailerObj?.key || '';
 
       // To do: casts.................................
-      const actors: CastProps[] = results.credits.cast
+      const actors: ActorProps[] = results.credits.cast
         .filter(
           (cast: CastProps) =>
             cast.known_for_department === 'Acting' && cast.order < 30
         )
         .map((actor: CastProps) => {
           return {
+            id: actor.id,
             name: actor.name,
             profilePath: actor.profile_path,
             character: actor.character,
           };
         });
-      const movieDetails = {
+      const movieDetails: MediaDetailsProps = {
         id,
         title,
         posterPath,
@@ -214,6 +217,9 @@ export const fetchMovieDetails = createAsyncThunk(
         ratingsMedia,
         trailer,
         actors,
+        popularity,
+        voteAverage,
+        voteCount,
       };
       // //  set local storage here if necessary
       // console.log(response);
@@ -262,6 +268,9 @@ const moviesSlice = createSlice({
       // delete movie at `movieIndex`
       state.favorites.splice(movieIndex, 1);
     },
+    updateMovieSelected: (state, action: PayloadAction<number>) => {
+      state.currentMovieSelected = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
@@ -270,9 +279,18 @@ const moviesSlice = createSlice({
         state.status = 'pending';
       })
       .addCase(fetchMovieDetails.fulfilled, (state, action: any) => {
-        state.status = 'idle';
+        state.status = 'suceeded';
         // state.movies = [];
-        state.moviesDetails.push(action?.payload);
+
+        const movieSearch = state.moviesDetails.find((movie) =>
+          movie.hasOwnProperty(action.payload.id)
+        );
+        // console.log(movieSearch);
+        if (!movieSearch) {
+          state.moviesDetails.push({
+            [action.payload.id as number]: action.payload,
+          });
+        }
       })
       .addCase(fetchMovieDetails.rejected, (state, action) => {
         // state.status = 'failed';
@@ -300,10 +318,22 @@ const moviesSlice = createSlice({
 });
 
 // Action creators generated for each reducer
-export const { addMovieFav, removeMovieFav } = moviesSlice.actions;
+export const { addMovieFav, removeMovieFav, updateMovieSelected } =
+  moviesSlice.actions;
 
 export const selectFavoriteMovies = (state: RootState) =>
   state.movies.favorites;
+
+export const selectMovieChosenId = (state: RootState) =>
+  state.movies.currentMovieSelected;
+
+export const selectMovieDetails = (state: RootState, id: number) => {
+  let movieDetailsObj = state.movies.moviesDetails.find((movie) =>
+    movie.hasOwnProperty(id)
+  );
+  if (movieDetailsObj) return movieDetailsObj[id];
+  return movieDetailsObj;
+};
 
 export const selectAllMovies = (state: RootState) => state.movies.movies;
 

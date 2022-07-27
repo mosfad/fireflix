@@ -129,7 +129,7 @@ export const CastCarousel = ({ cast }: { cast: ActorProps[] }) => {
           position: 'relative',
           padding: '0 2rem ', //
           maxWidth: '1280px', // Very important; child should be 100% of this!!!
-          boxSizing: 'border-box', // Very important; forces width of carousel container within column width set in <MediaDetailsPage/>
+          boxSizing: 'border-box', // Very important; forces width + padding + border of carousel container within column width set in <MediaDetailsPage/>
           minHeight: '16rem', // affects height of container & its children.
           marginBottom: '4rem',
           marginTop: '0.5rem', //

@@ -93,7 +93,9 @@ export const LoginForm = () => {
 
   useEffect(() => {
     const loginAuthUser = async () => {
-      if (isLoggedin && userId && !isAuthenticating) {
+      if (!isAuthenticating && isLoggedin && userId) {
+        // remove alert (snackbar)
+        setOpen(false);
         // get user account from db
         await dispatch(getUserDatabase(userId));
         // go to user dashboard
@@ -101,7 +103,11 @@ export const LoginForm = () => {
       }
     };
     loginAuthUser();
-  }, [isLoggedin, userId, isAuthenticating]);
+  });
+
+  // To do: ❗How do I figure out if user has pressed submit before activating snackbar???
+  // Soln: Delay <Snackbar/> inside Formik's onSubmit function until user has been authenticated.
+  // It's the only place to verify user has submitted credentials**
 
   return (
     <Formik
@@ -110,7 +116,7 @@ export const LoginForm = () => {
       onSubmit={async (values, { resetForm }) => {
         const { email, password } = values;
         await dispatch(fetchUser({ email, password }));
-        await sleep(600);
+        await sleep(800);
         if (!isAuthenticating && !isLoggedin && !userId) {
           console.log('User is not logged in!');
           setOpen(true);

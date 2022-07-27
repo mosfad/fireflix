@@ -5,17 +5,29 @@ import authReducer from '../features/auth/authSlice';
 import peopleReducer from '../features/people/peopleSlice';
 import {
   getLocalStore,
+  saveLocalStore,
   deleteLocalStoreTimeExpires,
 } from '../utilities/localStorage';
 
 const preloadedState = () => {
   // deleteLocalStoreTimeExpires('movies');
   // return getLocalStore('movies') ? { movies: getLocalStore('movies') } : null;
+  // return {
+  //   movies: getLocalStore('movies') || {
+  //     movies: [],
+  //     favorites: [],
+  //     status: 'idle',
+  //     error: null,
+  //   },
+  // };
   return {
     movies: getLocalStore('movies') || {
-      movies: [],
-      favorites: [],
-      status: 'idle',
+      movies: {
+        trending: [],
+        popular: [],
+        upcoming: [],
+      },
+      moviesDetails: [],
       error: null,
     },
   };
@@ -29,7 +41,12 @@ const store = configureStore({
     auth: authReducer,
     people: peopleReducer,
   },
-  // preloadedState: preloadedState(),
+  preloadedState: preloadedState(),
+});
+
+store.subscribe(() => {
+  const state = store.getState();
+  saveLocalStore('movies', state.movies);
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

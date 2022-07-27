@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+
 import ImageList from '@mui/material/ImageList';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -7,19 +9,27 @@ import ImageListItem from '@mui/material/ImageListItem';
 import { prependImagePath } from '../utilities/urlGenerator';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import { MediaDetailsProps } from '../shared/types';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ListSubheader from '@mui/material/ListSubheader';
 import IconButton from '@mui/material/IconButton';
 import InfoIcon from '@mui/icons-material/Info';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import Button from '@mui/material/Button';
+
 import ExpandCircleDownIcon from '@mui/icons-material/ExpandCircleDown';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+
 import LoadingSpinner from './LoadingSpinner';
 import './Media.css';
 import { containerClasses } from '@mui/material';
 import { MediaFacts } from './MediaFacts';
 import { CastCarousel } from './CastCarousel';
+import { PlayCircle } from '@mui/icons-material';
+import { letterSpacing } from '@mui/system';
 
 export const MediaDetails = ({
   media,
@@ -31,7 +41,12 @@ export const MediaDetails = ({
       <Grid container direction="column" sx={{ maxWidth: '100%' }}>
         <Grid
           item
-          sx={{ flexBasis: '760px', marginBottom: '3rem', textAlign: 'left' }}
+          sx={{
+            position: 'relative',
+            flexBasis: '760px',
+            marginBottom: '1rem',
+            textAlign: 'left',
+          }}
         >
           <img
             src={`https://www.themoviedb.org/t/p/w1280${media?.backdropPath}`}
@@ -46,6 +61,31 @@ export const MediaDetails = ({
             }}
             className="media-details__image--backdrop"
           />
+          <Button
+            variant="contained"
+            component="a"
+            href={`https://www.youtube.com/watch?v=${media.trailer}`} // not working!!!
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={<PlayArrowIcon sx={{ fontSize: '2rem' }} />}
+            sx={{
+              color: 'white',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translate(-50%, 50%)',
+              bottom: '20%',
+              zIndex: '200',
+              padding: '1rem 2rem',
+              backgroundColor: '#000000a1',
+              '&:hover': {
+                backgroundColor: '#302d2deb',
+              },
+            }}
+          >
+            <Typography sx={{ opacity: '1', letterSpacing: '1px' }}>
+              Play Trailer
+            </Typography>
+          </Button>
         </Grid>
         <Grid item sx={{ marginBottom: '.5rem' }}>
           <Typography

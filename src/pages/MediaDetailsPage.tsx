@@ -1,6 +1,6 @@
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { SideNavDashboard } from '../components/SideNavDashboard';
 import FavoriteMedia from '../components/FavoriteMedia';
 import Typography from '@mui/material/Typography';
@@ -19,6 +19,8 @@ import {
 import { Fragment, useEffect } from 'react';
 import { flexbox } from '@mui/system';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Button from '@mui/material/Button';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 
 export const MediaDetailsPage = () => {
   const mediaId = useAppSelector((state) => selectMovieChosenId(state));
@@ -29,7 +31,7 @@ export const MediaDetailsPage = () => {
 
   useEffect(() => {
     const fetchMediaDetails = async () => {
-      if (mediaId) {
+      if (mediaId && mediaDetails === undefined) {
         const results = await dispatch(
           fetchMovieDetails(mediaUrl('movie', mediaId))
         ).unwrap();
@@ -51,10 +53,37 @@ export const MediaDetailsPage = () => {
               <Box
                 sx={{
                   // height: '100vh',
+                  position: 'relative',
                   backgroundColor: 'gray',
                   opacity: '.95',
                 }}
-              ></Box>
+              >
+                <Button
+                  variant="contained"
+                  component={RouterLink}
+                  to="/" // not working!!!
+                  startIcon={<ArrowBackIosIcon sx={{ fontSize: '2rem' }} />}
+                  sx={{
+                    color: 'white',
+                    position: 'absolute',
+                    left: '6rem',
+                    top: '3rem',
+                    transform: 'translate(-50%, 50%)',
+                    zIndex: '200',
+                    padding: '1rem 2rem',
+                    // backgroundColor: '#000000a1',
+                    backgroundColor: 'transparent',
+                    '&:hover': {
+                      backgroundColor: '#161617ed',
+                    },
+                  }}
+                  disableRipple
+                >
+                  <Typography sx={{ opacity: '1', letterSpacing: '1px' }}>
+                    Back
+                  </Typography>
+                </Button>
+              </Box>
             </Grid>
             <Grid item sx={{ /*flexBasis: '1280px'*/ maxWidth: '1280px' }}>
               <MediaDetails media={mediaDetails} />

@@ -66,7 +66,7 @@ function App() {
         <AuthProvider>
           <ThemeProvider theme={theme}>
             <NavBar />
-            {movieStatus === 'pending' && <LoadingSpinner />}
+            {/* {movieStatus === 'pending' && <LoadingSpinner />} */}
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/signup" element={<SignupPage />} />

@@ -13,7 +13,7 @@ export const getLocalStore = (itemKey: string) => {
 export const startSaveTime = () => Date.now();
 
 export const saveLocalStore = <T>(itemKey: string, itemValue: T) => {
-  let expiry = Date.now() + 24 * 60 * 60 * 1000;
+  let expiry = Date.now() + 6 * 60 * 60 * 1000;
   itemValue = { ...itemValue, expiry };
   if (typeof window.localStorage === 'undefined') return null;
   try {

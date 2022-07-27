@@ -98,6 +98,8 @@ const initialState: MovieState = {
   error: null,
 };
 
+// Todo:
+
 // Todo: fetch movies to display posters
 export const fetchTrendingMovies = createAsyncThunk(
   'movies/fetchTrendingMovies',
@@ -300,7 +302,12 @@ const moviesSlice = createSlice({
         state.status = 'pending';
       })
       .addCase(fetchTrendingMovies.fulfilled, (state, action: any) => {
-        state.status = 'suceeded';
+        if (
+          state.movies.trending.length > 0 &&
+          state.movies.popular.length > 0 &&
+          state.movies.upcoming.length > 0
+        )
+          state.status = 'suceeded';
         if (state.movies)
           state.movies[action.payload.category as MediaCategories] =
             action.payload.arrayMovies;

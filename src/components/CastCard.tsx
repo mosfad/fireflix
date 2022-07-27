@@ -13,17 +13,41 @@ export const CastCard = ({ cast }: { cast: ActorProps }) => {
         alt={cast?.name}
         loading="lazy"
         style={{ borderRadius: '1rem' }}
-        className="media-item__image" //
+        className="media-item__image media-item__image--cast" //
       />
       <Typography
-        align="left"
-        sx={{ color: '#eee', position: 'relative', top: '-5rem' }}
+        align="center"
+        sx={{
+          color: '#eee',
+          position: 'absolute',
+          top: '0rem',
+          backgroundColor: '#00000057',
+          letterSpacing: '1px',
+          width: '100%',
+          borderTopLeftRadius: '1rem',
+          borderTopRightRadius: '1rem',
+        }}
+        className="media-item__text--name"
       >
         {cast?.name}
       </Typography>
       <Typography
-        align="left"
-        sx={{ color: '#eee', position: 'relative', top: '-5rem' }}
+        align="center"
+        sx={{
+          color: '#efefef',
+          position: 'absolute',
+          top: '11.1rem',
+          //marginTop: '1rem',
+          backgroundColor: '#000000c2',
+          fontWeight: '500',
+          letterSpacing: '1px',
+          width: '100%',
+          borderBottomLeftRadius: '1rem',
+          borderBottomRightRadius: '1rem',
+          height: '2.75rem',
+          // padding: '.25rem 0rem',
+        }}
+        className="media-item__text--character"
       >
         {cast?.character}
       </Typography>

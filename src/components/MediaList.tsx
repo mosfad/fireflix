@@ -269,7 +269,7 @@ export default function MediaList({
     }
   }, [movieArray, categoryName, mediaReqUrl, dispatch]);
 
-  return movieStatus === 'pending' ? (
+  return movieArray.length === 0 ? (
     <div>
       <LoadingSpinner />
     </div>

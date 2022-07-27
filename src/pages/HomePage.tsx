@@ -3,14 +3,35 @@ import { useState, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { mediaTrendingUrl } from '../utilities/urlGenerator';
 import Grid from '@mui/material/Grid';
+
+import LoadingSpinner from '../components/LoadingSpinner';
 import Box from '@mui/material/Box';
 import axios from 'axios';
 import MediaList from '../components/MediaList';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import {
+  fetchTrendingMovies,
+  //   updateCurrentCategory,
+  selectAllMovies,
+  selectMovieStatus,
+} from '../features/movies/moviesSlice';
 
 export const HomePage = () => {
-  return (
+  const movieStatus = useAppSelector((state) => selectMovieStatus(state));
+  const movies = useAppSelector((state) => selectAllMovies(state));
+  console.log(movies);
+  let hasTrending = movies.trending.length > 0 ? true : false;
+  let hasPopular = movies.popular.length > 0 ? true : false;
+  let hasUpcoming = movies.upcoming.length > 0 ? true : false;
+  console.log(hasTrending);
+  console.log(hasPopular);
+  console.log(hasUpcoming);
+  return !hasTrending || !hasPopular || !hasUpcoming ? (
+    <div className="loading-spinner__home">
+      <LoadingSpinner />
+    </div>
+  ) : (
     <div>
-      Tomorrow
       <Box sx={{ marginTop: '5rem' }}>
         <Grid container direction="row" justifyContent="center">
           <MediaList categoryName="trending" mediaName="movie" time="day" />

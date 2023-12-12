@@ -26,6 +26,7 @@ import {
   updateDisplayName,
   selectAuthError,
 } from '../features/auth/authSlice';
+import { User as FirebaseUser } from 'firebase/auth';
 import { addUserDatabase, getUserDatabase } from '../features/users/usersSlice';
 import { Navigate, useNavigate } from 'react-router-dom';
 import type { ErrorProps } from '../shared/types';
@@ -54,6 +55,9 @@ const validationSchema = Yup.object({
 export const SignupForm = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
+  const currUserObject = useAuth();
+  let fbaseUser = currUserObject ? currUserObject.currUser : null;
 
   const error = useAppSelector((state) => selectAuthError(state));
   const user = useAppSelector((state) => selectAuthUser(state));
@@ -89,7 +93,9 @@ export const SignupForm = () => {
       if (userId && email && !errorMessg) {
         console.log('New user has been added...');
         // update profile
-        await dispatch(updateProfileUser({ name, photoUrl }));
+        await dispatch(
+          updateProfileUser({ currentUser: fbaseUser, name, photoUrl })
+        );
         // update display name
         await dispatch(updateDisplayName(name));
         // create user account in db
@@ -97,7 +103,7 @@ export const SignupForm = () => {
         // get user account from db
         await dispatch(getUserDatabase(userId));
         // to to user dashboard.
-        navigate('/dashboard', { replace: true });
+        navigate('/favorites', { replace: true });
       }
     };
     setupNewUser();

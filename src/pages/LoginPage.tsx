@@ -10,7 +10,7 @@ import { userInfo } from 'os';
 
 export const LoginPage = () => {
   const auth = useAuth();
-  let user = auth?.user;
+  //let user = auth?.user;
 
   return (
     <Box

@@ -1,85 +1,89 @@
-import './NavBar.css';
-import * as React from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+import "./NavBar.css";
+import * as React from "react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
   logoutUser,
   selectAuthUser,
   selectLoginStatus,
-} from '../features/auth/authSlice';
-import { resetLoggedoutUser } from '../features/users/usersSlice';
-import { styled, alpha } from '@mui/material/styles';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import InputBase from '@mui/material/InputBase';
-import Badge from '@mui/material/Badge';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
+} from "../features/auth/authSlice";
+// import { getLocalStore } from "../utilities/localStorage";
+import { resetLoggedoutUser } from "../features/users/usersSlice";
+import { styled, alpha } from "@mui/material/styles";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import InputBase from "@mui/material/InputBase";
+import Badge from "@mui/material/Badge";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 // import MenuIcon from '@mui/icons-material/Menu';
-import FireplaceIcon from '@mui/icons-material/Fireplace';
-import SearchIcon from '@mui/icons-material/Search';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import MailIcon from '@mui/icons-material/Mail';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import MoreIcon from '@mui/icons-material/MoreVert';
-import { useAuth } from '../hooks/useAuth';
-import '../App.css';
-import Avatar from '@mui/material/Avatar';
-import { MediaTypeSelectButton } from './MediaTypeSelectButton';
+import FireplaceIcon from "@mui/icons-material/Fireplace";
+import SearchIcon from "@mui/icons-material/Search";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import MailIcon from "@mui/icons-material/Mail";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import MoreIcon from "@mui/icons-material/MoreVert";
+import { useAuth } from "../hooks/useAuth";
+import "../App.css";
+import Avatar from "@mui/material/Avatar";
+import { AvatarNavMenu } from "./AvatarNavMenu";
+import { MediaTypeSelectButton } from "./MediaTypeSelectButton";
+import { Theme, useMediaQuery } from "@mui/material";
 
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
+/*const Search = styled("div")(({ theme }) => ({
+  position: "relative",
   borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
+  "&:hover": {
     backgroundColor: alpha(theme.palette.common.white, 0.25),
   },
   marginRight: theme.spacing(2),
   marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
     marginLeft: theme.spacing(3),
-    width: 'auto',
+    width: "auto",
   },
 }));
 
-const SearchIconWrapper = styled('div')(({ theme }) => ({
+const SearchIconWrapper = styled("div")(({ theme }) => ({
   padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
+  color: "inherit",
+  "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
+    transition: theme.transitions.create("width"),
+    width: "100%",
+    [theme.breakpoints.up("md")]: {
+      width: "20ch",
     },
   },
-}));
+}));*/
 
-type UserMenuDisplayProps = 'none' | 'flex';
+type UserMenuDisplayProps = "none" | "flex";
 
 export function NavBar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
   const [userMenuDisplay, setUserMenuDisplay] =
-    React.useState<UserMenuDisplayProps>('none');
+    React.useState<UserMenuDisplayProps>("none");
 
   // const auth = useAuth();
   const dispatch = useAppDispatch();
@@ -108,27 +112,36 @@ export function NavBar() {
     setMobileMoreAnchorEl(event.currentTarget);
   };
 
-  const handleLogoutClick = async (event: React.MouseEvent<HTMLElement>) => {
+  const handleLogoutClick = async (
+    event: React.MouseEvent<HTMLElement>
+  ): Promise<void> => {
     event.preventDefault();
     // await auth?.logoutUser();
     await dispatch(resetLoggedoutUser());
     await dispatch(logoutUser());
-    navigate('/');
+    navigate("/");
   };
 
-  const menuId = 'primary-search-account-menu';
+  console.log(user);
+
+  const matches = useMediaQuery((theme: Theme) => theme.breakpoints.down("md"));
+  console.log("matches returns => ", matches);
+
+  //let isAuth = getLocalStore("isAuth");
+
+  /*const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
       anchorEl={anchorEl}
       anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
+        vertical: "top",
+        horizontal: "right",
       }}
       id={menuId}
       keepMounted
       transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
+        vertical: "top",
+        horizontal: "right",
       }}
       open={isMenuOpen}
       onClose={handleMenuClose}
@@ -138,19 +151,19 @@ export function NavBar() {
     </Menu>
   );
 
-  const mobileMenuId = 'primary-search-account-menu-mobile';
+  const mobileMenuId = "primary-search-account-menu-mobile";
   const renderMobileMenu = (
     <Menu
       anchorEl={mobileMoreAnchorEl}
       anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
+        vertical: "top",
+        horizontal: "right",
       }}
       id={mobileMenuId}
       keepMounted
       transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
+        vertical: "top",
+        horizontal: "right",
       }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
@@ -188,36 +201,58 @@ export function NavBar() {
         <p>Profile</p>
       </MenuItem>
     </Menu>
-  );
+  );*/
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box
+      sx={{
+        //flexGrow: 1,
+        height: "1rem" /*remove white section underneath header*/,
+      }}
+    >
       <AppBar
         position="fixed"
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
-        <Toolbar>
+        <Toolbar
+          disableGutters
+          sx={{
+            paddingX: "2rem",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
           <IconButton
             size="large"
             edge="start"
             color="secondary"
             aria-label="open drawer"
-            sx={{ mr: 2 }}
+            sx={{ mr: 2, display: "flex" }}
           >
             <RouterLink className="btn__logo" to="/">
-              <FireplaceIcon />
+              <Grid
+                container
+                justifyContent="space-between"
+                alignContent="center"
+              >
+                <FireplaceIcon />
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="span"
+                  color="secondary"
+                  sx={{
+                    marginLeft: "0.25rem",
+                    display: { xs: "none", sm: "inline-block" },
+                  }}
+                >
+                  Fireflix
+                </Typography>
+              </Grid>
             </RouterLink>
           </IconButton>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            color="secondary"
-            sx={{ display: { xs: 'none', sm: 'block' } }}
-          >
-            Fireflix
-          </Typography>
-          <Search>
+
+          {/* <Search>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
@@ -225,16 +260,20 @@ export function NavBar() {
               placeholder="Search…"
               inputProps={{ 'aria-label': 'search' }}
             />
-          </Search>
+          </Search> */}
           <MediaTypeSelectButton />
-          <Box sx={{ flexGrow: 1 }} />
+          {/* <Box sx={{ flexGrow: 1 }} /> */}
           {!user ? (
-            <Stack spacing={2} direction="row">
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ display: { xs: "none", sm: "flex" } }}
+            >
               <Button
                 component={RouterLink}
                 to="/signup"
                 variant="contained"
-                size="large"
+                size={matches ? "medium" : "large"}
                 color="secondary"
               >
                 {/* <Link className="btn__link--white" to="/signup">
@@ -246,7 +285,7 @@ export function NavBar() {
                 component={RouterLink}
                 to="/login"
                 variant="outlined"
-                size="large"
+                size={matches ? "medium" : "large"}
                 color="secondary"
                 sx={
                   {
@@ -261,12 +300,16 @@ export function NavBar() {
               </Button>
             </Stack>
           ) : (
-            <Stack spacing={2} direction="row">
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ display: { xs: "none", sm: "flex" } }}
+            >
               <Button
                 component={RouterLink}
                 to="/"
                 variant="outlined"
-                size="large"
+                size={matches ? "medium" : "large"}
                 color="secondary"
                 sx={
                   {
@@ -280,7 +323,13 @@ export function NavBar() {
               </Link> */}
                 Log out
               </Button>
-              <Avatar
+              <AvatarNavMenu
+                hasPages={[{ favorites: "Favorites" }, { account: "Profile" }]}
+                userImageUrl={user.photoURL || "/broken-image.jpg"}
+                userName={user.displayName || "Dupe Fadina"}
+                //onClickLogout={undefined}
+              />
+              {/* <Avatar
                 component={RouterLink}
                 to="/dashboard"
                 src="/broken-image.jpg"
@@ -289,11 +338,42 @@ export function NavBar() {
                   backgroundColor: '#ED6C02',
                   textDecoration: 'none',
                 }}
-              />
+              /> */}
             </Stack>
           )}
-          <Box sx={{ display: `${userMenuDisplay}` }}>
-            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
+          {!user ? (
+            <Box
+              sx={{
+                display: { xs: "flex", sm: "none" },
+              }}
+            >
+              <AvatarNavMenu
+                hasPages={[{ signup: "Sign up" }, { login: "Log in" }]}
+                userImageUrl="/broken-image.jpg"
+                userName=""
+                //onClickLogout={undefined}
+              />
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: { xs: "flex", sm: "none" },
+              }}
+            >
+              <AvatarNavMenu
+                hasPages={[
+                  { favorites: "Favorites" },
+                  { account: "Profile" },
+                  { logout: "Log out" },
+                ]}
+                onClickLogout={handleLogoutClick}
+                userImageUrl={user.photoURL || "/broken-image.jpg"}
+                userName={user.displayName || "Dupe Fadina"}
+              />
+            </Box>
+          )}
+          {/*<Box sx={{ display: `${userMenuDisplay}` }}>
+            <Box sx={{ display: { xs: "none", md: "flex" } }}>
               <IconButton
                 size="large"
                 aria-label="show 4 new mails"
@@ -324,7 +404,7 @@ export function NavBar() {
                 <AccountCircle />
               </IconButton>
             </Box>
-            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+            <Box sx={{ display: { xs: "flex", md: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="show more"
@@ -336,11 +416,11 @@ export function NavBar() {
                 <MoreIcon />
               </IconButton>
             </Box>
-          </Box>
+          </Box>*/}
         </Toolbar>
       </AppBar>
-      {renderMobileMenu}
-      {renderMenu}
+      {/*{renderMobileMenu}
+      {renderMenu}*/}
     </Box>
   );
 }

@@ -5,31 +5,35 @@ import {
   useRef,
   useLayoutEffect,
   MouseEvent,
-} from 'react';
+} from "react";
 // import { MovieCard } from './MovieCard';
-import ImageList from '@mui/material/ImageList';
+import ImageList from "@mui/material/ImageList";
 // import { useLocalStorage } from '../hooks/useLocalStorage';
-import { mediaTrendingUrl } from '../utilities/urlGenerator';
-import axios from 'axios';
-import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
-import IconButton from '@mui/material/IconButton';
-import InfoIcon from '@mui/icons-material/Info';
-import useFetch from '../hooks/useFetch';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { selectLoginStatus, selectAuthUser } from '../features/auth/authSlice';
-import { getUserDB, getUserFav } from '../services/databaseServices';
-import LoadingSpinner from './LoadingSpinner';
-import { FavoriteCard } from './FavoriteCard';
-import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
-import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Slide from '@mui/material/Slide';
-import './Media.css';
-import { current } from '@reduxjs/toolkit';
+import { mediaTrendingUrl } from "../utilities/urlGenerator";
+import axios from "axios";
+import ImageListItem from "@mui/material/ImageListItem";
+import ImageListItemBar from "@mui/material/ImageListItemBar";
+import ListSubheader from "@mui/material/ListSubheader";
+import IconButton from "@mui/material/IconButton";
+import InfoIcon from "@mui/icons-material/Info";
+import useFetch from "../hooks/useFetch";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { selectLoginStatus, selectAuthUser } from "../features/auth/authSlice";
+import { selectFavorites } from "../features/favorites/favoritesSlice";
+//import { getUserDB, getUserFav } from "../services/databaseServices";
+import { fetchFavorites } from "../features/favorites/favoritesSlice";
+import LoadingSpinner from "./LoadingSpinner";
+import { FavoriteCard } from "./FavoriteCard";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Slide from "@mui/material/Slide";
+import "./Media.css";
+import { current } from "@reduxjs/toolkit";
+import { AnyNsRecord } from "dns";
+import { MediaProps } from "../shared/types";
 
 // utility function to handle type issues
 // with `Error`
@@ -39,8 +43,10 @@ function getErrorMessage(error: unknown) {
 }
 type MoviePropsArray =
   | {
+      id: number;
       title: string;
-      poster: string;
+      posterPath: string;
+      mediaType: "movies" | "tv";
       // id: number;
       //   media_type: string;
       //   original_language: string;
@@ -50,8 +56,8 @@ type MoviePropsArray =
     }[]
   | null;
 
-type SlideDirectionProps = 'left' | 'right' | 'up' | 'down' | undefined;
-type ArrowClickProps = 'left' | 'right' | undefined;
+type SlideDirectionProps = "left" | "right" | "up" | "down" | undefined;
+type ArrowClickProps = "left" | "right" | undefined;
 type ImageListPositionProps = number | null;
 
 export default function FavoriteMedia() {
@@ -60,10 +66,11 @@ export default function FavoriteMedia() {
   const dispatch = useAppDispatch();
   const isLoggedin = useAppSelector((state) => selectLoginStatus(state));
   const user = useAppSelector((state) => selectAuthUser(state));
+  const favorites = useAppSelector((state) => selectFavorites(state));
   //   const movieStatus = useAppSelector((state) => selectMovieStatus(state));
-  const userId = user?.uid;
+  const userId = user?.uid; // TODO: REUSABLE.....
   //  const [url, setUrl] = useState(movieTrendingUrl);
-  const [media, setMedia] = useState<MoviePropsArray | null>(null);
+  const [media, setMedia] = useState<MediaProps[] | null>(null);
   const [slide, setSlide] = useState<number>(1);
   //
   const [widthSlideContainer, setWidthSlideContainer] = useState<number>(0);
@@ -78,14 +85,14 @@ export default function FavoriteMedia() {
     direction: SlideDirectionProps
   ) => {
     if (!listElemSlides || !direction || !numOfSlides) return;
-    if (direction === 'left') {
+    if (direction === "left") {
       if (slide > slideMoves) {
         setSlide((prevSlide) => prevSlide - slideMoves);
       } else {
         setSlide(1);
       }
     }
-    if (direction === 'right') {
+    if (direction === "right") {
       if (numOfSlides - slide + 1 > slideMoves) {
         setSlide((prevSlide) => prevSlide + slideMoves);
       }
@@ -104,7 +111,7 @@ export default function FavoriteMedia() {
 
   useEffect(() => {
     let imageListElem = imageRef?.current;
-    if (imageListElem && slideDirection === 'left') {
+    if (imageListElem && slideDirection === "left") {
       if (slide === 1) imageListElem.style.transform = `translateX(0)`;
       else
         imageListElem.style.transform = `translateX(-${
@@ -112,7 +119,7 @@ export default function FavoriteMedia() {
         }px)`;
     }
 
-    if (imageListElem && slideDirection === 'right') {
+    if (imageListElem && slideDirection === "right") {
       if (numOfSlides && slide <= numOfSlides)
         imageListElem.style.transform = `translateX(-${
           (slide - 1) * posterWidth
@@ -133,28 +140,63 @@ export default function FavoriteMedia() {
   });
 
   useLayoutEffect(() => {
-    window.addEventListener('resize', updateContainerAndSlide);
+    window.addEventListener("resize", updateContainerAndSlide);
     return () => {
-      window.removeEventListener('resize', updateContainerAndSlide);
+      window.removeEventListener("resize", updateContainerAndSlide);
     };
   }, []);
 
   // Use RTK to fetch data and comment out top line.
+  //TO DO: REVIEW THIS CODE! THINK ABOUT PREVENTING UNNECESSARY
+  // NETWORK REQUESTS.
+  let favoritesLength = favorites.length;
+  // let mediaLength = media === null ? 0 : media.length;
+
+  /*useEffect(() => {
+    if (favoritesLength > 0) {
+      setMedia(favorites);
+    }
+    //console.log(userId);
+    //console.log(favorites);
+  }, []);*/
+
   useEffect(() => {
-    const fetchFavorites = async () => {
+    const fetchFavoritesMedia = async () => {
       if (userId) {
-        let response: any = await getUserFav(userId);
+        await dispatch(fetchFavorites(userId));
+      }
+    };
+
+    if (favoritesLength > 0) {
+      setNumOfSlides(favoritesLength);
+    } else {
+      fetchFavoritesMedia();
+    }
+  }, [userId, favoritesLength]);
+
+  /*
+  useEffect(() => {
+    // To do: Change to getFavorites dispatch....
+    const fetchFavoritesMedia = async () => {
+      if (userId && mediaLength === 0) {
+        let response = await dispatch(fetchFavorites(userId));
         console.log(response);
-        if (typeof response !== 'undefined') {
-          setMedia(response);
-          setNumOfSlides(response.length);
+        if (typeof response !== "undefined") {
+          //setMedia(response as any);
+          setMedia(response.payload as MediaProps[]);
+          console.log(favorites); // removve this to see what happens!!!!!
+          console.log(media);
+          //setNumOfSlides(response.length);
         }
       }
     };
-    fetchFavorites();
-  }, [userId]);
+    // Prevent unnecessary requests to DB.
+    if (favoritesLength === 0) {
+      fetchFavoritesMedia();
+    }
+  }, [userId]);*/
 
-  return media === null ? (
+  return favoritesLength === 0 ? (
     <div>
       <LoadingSpinner />
     </div>
@@ -163,13 +205,14 @@ export default function FavoriteMedia() {
       <Box
         className="fav-menu"
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          overflowX: 'auto',
-          position: 'relative',
-          padding: '0 2rem ',
-          minHeight: '26rem',
-          marginBottom: '4rem',
+          display: "flex",
+          alignItems: "center",
+          overflowX: "auto",
+          position: "relative",
+          padding: "0 2rem ",
+          minHeight: "28rem",
+          marginBottom: "0.5rem", //was 4rem
+          marginTop: "0.5rem", //
         }}
         ref={imageContainerRef}
       >
@@ -178,15 +221,15 @@ export default function FavoriteMedia() {
           variant="subtitle1"
           component="h3"
           sx={{
-            color: 'white',
+            color: "white",
             //padding: '2rem 2rem 2rem 0rem',
             //marginBottom: '2rem',
-            fontFamily: 'Merriweather Sans, sans-serif',
-            fontWeight: '700',
-            fontSize: '2rem',
-            letterSpacing: '3px',
-            position: 'absolute',
-            top: '0',
+            fontFamily: "Merriweather Sans, sans-serif",
+            fontWeight: "700",
+            fontSize: "1.5rem",
+            letterSpacing: "3px",
+            position: "absolute",
+            top: "2rem", // was 0
           }}
         >
           Favorite Movies
@@ -194,30 +237,30 @@ export default function FavoriteMedia() {
         <IconButton
           size="large"
           sx={{
-            position: 'absolute',
-            left: '.25rem',
-            top: '50%',
-            transform: 'translate(25%, -50%)',
-            zIndex: '3000',
-            color: 'white',
+            position: "absolute",
+            left: "-1.75rem",
+            top: "50%",
+            transform: "translate(25%, -50%)",
+            zIndex: "3000",
+            color: "white",
           }}
-          onClick={(e) => handleArrowClick(e, 'left')}
+          onClick={(e) => handleArrowClick(e, "left")}
         >
-          <ArrowCircleLeftIcon /*fontSize="large"*/ sx={{ fontSize: '3rem' }} />
+          <ArrowCircleLeftIcon /*fontSize="large"*/ sx={{ fontSize: "3rem" }} />
         </IconButton>
 
         <ImageList
           className="fav-menu media-card__menu"
           component="ul"
           sx={{
-            gridAutoFlow: 'column',
+            gridAutoFlow: "column",
             gridTemplateColumns:
-              'repeat(auto-fit, minmax(160px,1fr)) !important',
-            gridAutoColumns: 'minmax(160px, 1fr)',
-            gridTemplateRows: 'minmax(240px, 1fr)',
+              "repeat(auto-fit, minmax(160px,160px)) !important",
+            gridAutoColumns: "minmax(160px, 160px)",
+            gridTemplateRows: "minmax(240px, 240px)",
             mt: 2,
             mb: 2,
-            overflowY: 'visible', // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
+            overflowY: "visible", // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
           }}
           gap={32}
           rowHeight={4}
@@ -225,7 +268,7 @@ export default function FavoriteMedia() {
           //   sx={{ padding: 4, marginTop: '4rem', height: '80%' }}
           ref={imageRef}
         >
-          {media.map((item, index) => (
+          {favorites.map((item, index) => (
             //
             <FavoriteCard key={`media-${index}`} item={item} />
           ))}
@@ -234,18 +277,40 @@ export default function FavoriteMedia() {
         <IconButton
           size="large"
           sx={{
-            position: 'absolute',
-            right: '.25rem',
-            top: '50%',
-            transform: 'translate(-25%, -50%)',
-            zIndex: '3000',
-            color: 'white',
+            position: "absolute",
+            right: "-1.75rem",
+            top: "50%",
+            transform: "translate(-25%, -50%)",
+            zIndex: "3000",
+            color: "white",
           }}
-          onClick={(e) => handleArrowClick(e, 'right')}
+          onClick={(e) => handleArrowClick(e, "right")}
         >
-          <ArrowCircleRightIcon sx={{ fontSize: '3rem' }} />
+          <ArrowCircleRightIcon sx={{ fontSize: "3rem" }} />
         </IconButton>
       </Box>
     </Fragment>
   );
 }
+
+/*
+<ImageList
+          className="fav-menu media-card__menu"
+          component="ul"
+          sx={{
+            gridAutoFlow: "column",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(160px,1fr)) !important",
+            gridAutoColumns: "minmax(160px, 1fr)",
+            gridTemplateRows: "minmax(240px, 1fr)",
+            mt: 2,
+            mb: 2,
+            overflowY: "visible", // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
+          }}
+          gap={32}
+          rowHeight={4}
+          //   cols={6}
+          //   sx={{ padding: 4, marginTop: '4rem', height: '80%' }}
+          ref={imageRef}
+        >
+        */

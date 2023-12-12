@@ -1,16 +1,20 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Timestamp } from 'firebase/firestore';
-import type { RootState } from '../../app/store';
-import { addUserDB, getUserDB } from '../../services/databaseServices';
-import { ErrorProps, MediaTypeProps } from '../../shared/types';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { Timestamp } from "firebase/firestore";
+import type { RootState } from "../../app/store";
+import {
+  addUserDB,
+  getUserDB,
+  deleteUserDB,
+} from "../../services/databaseServices";
+import { ErrorProps, MediaTypeProps } from "../../shared/types";
 
 type UserState = {
   name: string | null;
   uid: string | null;
   email: string | null;
-  mediaSelected: MediaTypeProps;
+  mediaSelected: MediaTypeProps | null;
   createdAt: Timestamp | number | null; //timestamp
-  loading: 'idle' | 'pending' | 'suceeded' | 'failed';
+  loading: "idle" | "pending" | "suceeded" | "failed";
   error?: string | null;
 };
 
@@ -21,12 +25,12 @@ type UserData = {
 };
 
 export const addUserDatabase = createAsyncThunk(
-  'users/addUserDatatbase',
+  "users/addUserDatatbase",
   async (userData: UserData, thunkAPI) => {
     const { name, email, uid } = userData;
     // type guard function checks if response is an auth error
     const isErrorResponse = (response: any): response is ErrorProps => {
-      return typeof response?.message === 'string';
+      return typeof response?.message === "string";
     };
     try {
       const userInfoResponse = await addUserDB(name, email, uid);
@@ -40,22 +44,37 @@ export const addUserDatabase = createAsyncThunk(
 );
 
 export const getUserDatabase = createAsyncThunk(
-  'users/getUserDatabase',
+  "users/getUserDatabase",
   async (userId: string, thunkAPI) => {
     try {
       const userInfoResponse = await getUserDB(userId);
-      if (typeof userInfoResponse === 'undefined') {
-        return thunkAPI.rejectWithValue('Document does not exist');
+      if (typeof userInfoResponse === "undefined") {
+        return thunkAPI.rejectWithValue("Document does not exist");
       }
       const { name, uid, email, createdAt } = userInfoResponse;
       return { name, uid, email, createdAt: createdAt.toMillis() };
     } catch (error) {
-      return thunkAPI.rejectWithValue('Document does not exist');
+      return thunkAPI.rejectWithValue("Document does not exist");
     }
   }
 );
 
-const fetchUserById = createAsyncThunk(
+export const deleteUserDatabase = createAsyncThunk(
+  "users/deleteUserDatabase",
+  async (userId: string, thunkAPI) => {
+    try {
+      const userInfoResponse = await deleteUserDB(userId);
+      if (typeof userInfoResponse === "undefined") {
+        return thunkAPI.rejectWithValue("Document does not exist");
+      }
+      return userInfoResponse;
+    } catch (error) {
+      return thunkAPI.rejectWithValue("Document does not exist");
+    }
+  }
+);
+
+/*const fetchUserById = createAsyncThunk(
   'users/fetchById',
   async (userId: number) => {
     return 'promise';
@@ -65,20 +84,20 @@ const fetchUserById = createAsyncThunk(
 interface UsersState {
   entities: [];
   loading: 'idle' | 'pending' | 'suceeded' | 'failed';
-}
+}*/
 
 const initialState: UserState = {
   name: null,
   uid: null,
   email: null,
-  mediaSelected: 'movie',
+  mediaSelected: null,
   createdAt: null,
-  loading: 'idle',
+  loading: "idle",
   error: null,
 };
-
+// TODO: FIX THE EXTRA REDUCERS........
 const usersSlice = createSlice({
-  name: 'users',
+  name: "users",
   initialState,
   reducers: {
     resetLoggedoutUser: (state) => {
@@ -86,7 +105,7 @@ const usersSlice = createSlice({
       state.uid = null;
       state.email = null;
       state.createdAt = null;
-      state.loading = 'idle';
+      state.loading = "idle";
       state.error = null;
     },
     updateMediaTypeChosen: (state, action) => {
@@ -96,44 +115,60 @@ const usersSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getUserDatabase.pending, (state, action) => {
-        state.loading = 'pending';
+        state.loading = "pending";
       })
       .addCase(getUserDatabase.fulfilled, (state, action: any) => {
         state.name = action.payload?.name;
         state.uid = action.payload?.uid;
         state.email = action.payload?.email;
         state.createdAt = action.payload?.createdAt;
-        state.loading = 'suceeded';
+        state.loading = "suceeded";
       })
       .addCase(getUserDatabase.rejected, (state, action: any) => {
-        state.loading = 'failed';
+        state.loading = "failed";
         state.error = action.payload?.error;
       })
       .addCase(addUserDatabase.pending, (state, action) => {
-        state.loading = 'pending';
+        state.loading = "pending";
       })
       .addCase(addUserDatabase.fulfilled, (state, action: any) => {
         // state.name = action.payload?.name;
         // state.uid = action.payload?.uid;
         // state.email = action.payload?.email;
         // state.createdAt = action.payload?.createdAt;
-        state.loading = 'suceeded';
+        state.loading = "suceeded";
       })
       .addCase(addUserDatabase.rejected, (state, action: any) => {
-        state.loading = 'failed';
+        state.loading = "failed";
         state.error = action.payload?.error;
       })
+      .addCase(deleteUserDatabase.pending, (state, action: any) => {
+        state.loading = "pending";
+        // state.error = action.payload?.error;
+      })
+      .addCase(deleteUserDatabase.fulfilled, (state, action: any) => {
+        // state.name = action.payload?.name;
+        // state.uid = action.payload?.uid;
+        // state.email = action.payload?.email;
+        // state.createdAt = action.payload?.createdAt;
+        state.loading = "suceeded";
+      })
+      .addCase(deleteUserDatabase.rejected, (state, action: any) => {
+        state.loading = "failed";
+        state.error = action.payload?.error;
+      });
+    /*
       .addCase(fetchUserById.pending, (state, action) => {
-        state.loading = 'pending';
+        state.loading = "pending";
       })
       .addCase(fetchUserById.fulfilled, (state, action) => {
-        state.loading = 'suceeded';
+        state.loading = "suceeded";
         // state.entities = ???
       })
       .addCase(fetchUserById.rejected, (state, action) => {
-        state.loading = 'failed';
+        state.loading = "failed";
         // state.error = action.error.message;
-      });
+      });*/
   },
 });
 

@@ -1,13 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import moviesReducer from '../features/movies/moviesSlice';
-import usersReducer from '../features/users/usersSlice';
-import authReducer from '../features/auth/authSlice';
-import peopleReducer from '../features/people/peopleSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import moviesReducer from "../features/movies/moviesSlice";
+import usersReducer from "../features/users/usersSlice";
+import authReducer from "../features/auth/authSlice";
+import peopleReducer from "../features/people/peopleSlice";
+import favoritesReducer from "../features/favorites/favoritesSlice";
 import {
   getLocalStore,
   saveLocalStore,
   deleteLocalStoreTimeExpires,
-} from '../utilities/localStorage';
+} from "../utilities/localStorage";
 
 const preloadedState = () => {
   // deleteLocalStoreTimeExpires('movies');
@@ -21,7 +22,7 @@ const preloadedState = () => {
   //   },
   // };
   return {
-    movies: getLocalStore('movies') || {
+    movies: getLocalStore("movies") || {
       movies: {
         trending: [],
         popular: [],
@@ -37,6 +38,7 @@ const store = configureStore({
   reducer: {
     movies: moviesReducer,
     // shows: showsReducer,
+    favorites: favoritesReducer,
     users: usersReducer,
     auth: authReducer,
     people: peopleReducer,
@@ -46,7 +48,7 @@ const store = configureStore({
 
 store.subscribe(() => {
   const state = store.getState();
-  saveLocalStore('movies', state.movies);
+  saveLocalStore("movies", state.movies);
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

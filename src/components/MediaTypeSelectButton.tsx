@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react';
-import Button from '@mui/material/Button';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
-import './Media.css';
+import { useState, useEffect } from "react";
+import Button from "@mui/material/Button";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
+import "./Media.css";
 import {
   selectMediaTypeChosen,
   updateMediaTypeChosen,
-} from '../features/users/usersSlice';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+} from "../features/users/usersSlice";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 
-import { MediaTypeProps, MediaTimeWindowProps } from '../shared/types';
+import { MediaTypeProps, MediaTimeWindowProps } from "../shared/types";
 
-const options = ['Movie', 'TV', 'All', 'Person'];
+const options = ["Movie", "TV", "All", "Person"];
 
 export const MediaTypeSelectButton = () => {
   const dispatch = useAppDispatch();
@@ -56,22 +56,21 @@ export const MediaTypeSelectButton = () => {
         }
       >
         <ListItem
-          button
           id="lock-button"
           aria-haspopup="listbox"
           aria-controls="lock-menu"
-          aria-expanded={open ? 'true' : undefined}
+          aria-expanded={open ? "true" : undefined}
           onClick={handleClickListItem}
         >
           <Button
             variant="outlined"
             // color="secondary"
             sx={{
-              color: 'white',
-              border: 'solid white 1px',
-              borderRadius: '1rem',
-              '&:hover': {
-                border: 'solid white 2px',
+              color: "white",
+              border: "solid #ffffff4a 2px",
+              borderRadius: "1rem",
+              "&:hover": {
+                border: "solid white 2px",
               },
             }}
             endIcon={<ArrowDropDownIcon />}
@@ -85,9 +84,10 @@ export const MediaTypeSelectButton = () => {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        disableScrollLock={true}
         MenuListProps={{
-          'aria-labelledby': 'lock-button',
-          role: 'listbox',
+          "aria-labelledby": "lock-button",
+          role: "listbox",
         }}
       >
         {options.map((option, index) => (

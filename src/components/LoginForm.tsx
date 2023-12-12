@@ -99,7 +99,7 @@ export const LoginForm = () => {
         // get user account from db
         await dispatch(getUserDatabase(userId));
         // go to user dashboard
-        navigate('/dashboard', { replace: true });
+        navigate('/favorites', { replace: true });
       }
     };
     loginAuthUser();

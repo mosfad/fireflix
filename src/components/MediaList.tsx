@@ -6,42 +6,42 @@ import {
   useLayoutEffect,
   MouseEvent,
   useMemo,
-} from 'react';
-import { MediaCard } from './MediaCard';
-import Box from '@mui/material/Box';
-import LoadingSpinner from './LoadingSpinner';
-import ImageList from '@mui/material/ImageList';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+} from "react";
+import { MediaCard } from "./MediaCard";
+import Box from "@mui/material/Box";
+import LoadingSpinner from "./LoadingSpinner";
+import ImageList from "@mui/material/ImageList";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import {
   mediaTrendingUrl,
   mediaPopularUrl,
   mediaUpcomingUrl,
   mediaTopRatedUrl,
-} from '../utilities/urlGenerator';
-import axios from 'axios';
-import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
-import IconButton from '@mui/material/IconButton';
-import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
-import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
-import Typography from '@mui/material/Typography';
-import InfoIcon from '@mui/icons-material/Info';
-import useFetch from '../hooks/useFetch';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+} from "../utilities/urlGenerator";
+import axios from "axios";
+import ImageListItem from "@mui/material/ImageListItem";
+import ImageListItemBar from "@mui/material/ImageListItemBar";
+import ListSubheader from "@mui/material/ListSubheader";
+import IconButton from "@mui/material/IconButton";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import Typography from "@mui/material/Typography";
+import InfoIcon from "@mui/icons-material/Info";
+import useFetch from "../hooks/useFetch";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
   fetchTrendingMovies,
   //   updateCurrentCategory,
   selectAllMovies,
   selectMovieStatus,
-} from '../features/movies/moviesSlice';
+} from "../features/movies/moviesSlice";
 import {
   MediaProps,
   MediaTimeWindowProps,
   MediaTypeProps,
   MediaCategories,
-} from '../shared/types';
-import './Media.css';
+} from "../shared/types";
+import "./Media.css";
 
 // utility function to handle type issues
 // with `Error`
@@ -61,8 +61,8 @@ function getErrorMessage(error: unknown) {
 // } | null;
 
 type MovieDataProps = MediaProps[] | null;
-type SlideDirectionProps = 'left' | 'right' | 'up' | 'down' | undefined;
-type ArrowClickProps = 'left' | 'right' | undefined;
+type SlideDirectionProps = "left" | "right" | "up" | "down" | undefined;
+type ArrowClickProps = "left" | "right" | undefined;
 
 export default function MediaList({
   categoryName,
@@ -87,6 +87,7 @@ export default function MediaList({
   //   }, []);
   //   console.log(moviesObj);
   const movieArray = moviesObj[categoryName as MediaCategories];
+  let movieLength = movieArray.length;
   const movieStatus = useAppSelector((state) => selectMovieStatus(state));
   //   if (mediaName === 'movie')
   //     mediaArray = JSON.parse(JSON.stringify(movieArray));
@@ -94,21 +95,23 @@ export default function MediaList({
   const [mediaArray, setMediaArray] = useState<MediaProps[]>([]);
   const [mediaReqUrl, setMediaReqUrl] = useState<string>(() => {
     switch (categoryName) {
-      case 'trending':
+      case "trending":
         return mediaTrendingUrl(mediaName, time);
-      case 'top rated':
+      case "top rated":
         return mediaTopRatedUrl(mediaName);
-      case 'popular':
+      case "popular":
         return mediaPopularUrl(mediaName);
-      case 'upcoming':
+      case "upcoming":
         return mediaUpcomingUrl(mediaName);
       default:
-        return '';
+        return "";
     }
   });
 
+  console.log("This is the media request url: ", mediaReqUrl);
+
   useEffect(() => {
-    // console.log(mediaReqUrl);
+    // console.log("This is the media request url: ", mediaReqUrl);
   }, [mediaReqUrl]);
   //   useEffect(() => {
   //     if (mediaName === 'movie' && moviesObj) {
@@ -143,14 +146,14 @@ export default function MediaList({
     // console.log(numOfSlides); // main problems****
     // console.log(listElemSlides);
     if (!listElemSlides || !direction || !numOfSlides) return;
-    if (direction === 'left') {
+    if (direction === "left") {
       if (slide > slideMoves) {
         setSlide((prevSlide) => prevSlide - slideMoves);
       } else {
         setSlide(1);
       }
     }
-    if (direction === 'right') {
+    if (direction === "right") {
       if (numOfSlides - slide + 1 > slideMoves) {
         setSlide((prevSlide) => prevSlide + slideMoves);
       }
@@ -158,11 +161,11 @@ export default function MediaList({
   };
 
   const formatCategoryName = () => {
-    const arr = categoryName.split(' ');
+    const arr = categoryName.split(" ");
     arr.forEach((word, index) => {
       arr[index] = word.substring(0, 1).toUpperCase() + word.substring(1);
     });
-    return arr.join(' ');
+    return arr.join(" ");
   };
 
   const handleArrowClick = (
@@ -170,9 +173,9 @@ export default function MediaList({
     direction: ArrowClickProps
   ) => {
     const imageListElem = imageRef?.current;
-    console.log('I clicked an arrow!');
-    // console.log(imageRef);
-    // console.log(imageListElem);
+    console.log("I clicked an arrow!");
+    //console.log(imageRef);
+    //console.log(imageListElem);
     if (imageListElem === null) return;
     // console.log('Setting slide moves and direction.....');
     setSlideDirection(direction);
@@ -186,7 +189,7 @@ export default function MediaList({
 
   useEffect(() => {
     let imageListElem = imageRef?.current;
-    if (imageListElem && slideDirection === 'left') {
+    if (imageListElem && slideDirection === "left") {
       //console.log('Sliding left.....');
       // console.log(slide);
       if (slide === 1) imageListElem.style.transform = `translateX(0)`;
@@ -196,7 +199,7 @@ export default function MediaList({
         }px)`;
     }
 
-    if (imageListElem && slideDirection === 'right') {
+    if (imageListElem && slideDirection === "right") {
       //console.log('Sliding right....');
       // console.log(slide);
       // console.log(numOfSlides);
@@ -222,9 +225,9 @@ export default function MediaList({
   });
 
   useLayoutEffect(() => {
-    window.addEventListener('resize', updateContainerAndSlide);
+    window.addEventListener("resize", updateContainerAndSlide);
     return () => {
-      window.removeEventListener('resize', updateContainerAndSlide);
+      window.removeEventListener("resize", updateContainerAndSlide);
     };
   }, []);
 
@@ -246,8 +249,10 @@ export default function MediaList({
     // console.log(mediaArray);
     // console.log(categoryName);
     // fetch if no local storage
-    if (movieArray.length === 0) {
+    console.log("length of movie array => ", movieLength);
+    if (movieLength === 0) {
       // This will prevent unnecessary renders
+      console.log("Shouldn't be empty movie array => ", movieLength);
       // console.log(mediaArray);
       const fetchAndUpdate = async function () {
         // console.log(mediaReqUrl);
@@ -267,7 +272,7 @@ export default function MediaList({
       };
       fetchAndUpdate();
     }
-  }, [movieArray, categoryName, mediaReqUrl, dispatch]);
+  }, [movieLength, categoryName, mediaReqUrl, dispatch]);
 
   return movieArray.length === 0 ? (
     <div>
@@ -278,14 +283,14 @@ export default function MediaList({
       <Box
         className="fav-menu"
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          overflowX: 'auto',
-          position: 'relative',
-          padding: '0 2rem ',
-          minHeight: '29rem',
-          marginBottom: '4rem',
-          marginTop: '0.5rem', //
+          display: "flex",
+          alignItems: "center",
+          overflowX: "auto",
+          position: "relative",
+          padding: "0 2rem ",
+          minHeight: "26rem",
+          marginBottom: "0.5rem", // was 4rem
+          marginTop: "0.5rem", //
         }}
         ref={imageContainerRef}
       >
@@ -294,15 +299,15 @@ export default function MediaList({
           variant="subtitle1"
           component="h3"
           sx={{
-            color: 'white',
+            color: "white",
             //padding: '2rem 2rem 2rem 0rem',
             //marginBottom: '2rem',
-            fontFamily: 'Merriweather Sans, sans-serif',
-            fontWeight: '700',
-            fontSize: '2rem',
-            letterSpacing: '3px',
-            position: 'absolute',
-            top: '0',
+            fontFamily: "Merriweather Sans, sans-serif",
+            fontWeight: "700",
+            fontSize: "1.5rem",
+            letterSpacing: "3px",
+            position: "absolute",
+            top: "2rem",
           }}
         >
           {formatCategoryName()}
@@ -310,29 +315,29 @@ export default function MediaList({
         <IconButton
           size="large"
           sx={{
-            position: 'absolute',
-            left: '.25rem',
-            top: '50%',
-            transform: 'translate(25%, -50%)',
-            zIndex: '100',
-            color: 'white',
+            position: "absolute",
+            left: "-1.75rem",
+            top: "50%",
+            transform: "translate(25%, -50%)",
+            zIndex: "100",
+            color: "white",
           }}
-          onClick={(e) => handleArrowClick(e, 'left')}
+          onClick={(e) => handleArrowClick(e, "left")}
         >
-          <ArrowCircleLeftIcon /*fontSize="large"*/ sx={{ fontSize: '3rem' }} />
+          <ArrowCircleLeftIcon /*fontSize="large"*/ sx={{ fontSize: "3rem" }} />
         </IconButton>
         <ImageList
           className="fav-menu media-card__menu"
           component="ul"
           sx={{
-            gridAutoFlow: 'column',
+            gridAutoFlow: "column",
             gridTemplateColumns:
-              'repeat(auto-fit, minmax(160px,1fr)) !important',
-            gridAutoColumns: 'minmax(160px, 1fr)',
-            gridTemplateRows: 'minmax(240px, 1fr)',
+              "repeat(auto-fit, minmax(160px, 160px)) !important",
+            gridAutoColumns: "minmax(160px, 160px)",
+            gridTemplateRows: "minmax(240px, 240px)",
             mt: 2,
             mb: 2,
-            overflowY: 'visible', // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
+            overflowY: "visible", // ⚠️Add this CSS rule to remove  `overflow-y: 'auto'` from MUI.
           }}
           gap={32}
           rowHeight={4}
@@ -349,17 +354,17 @@ export default function MediaList({
         <IconButton
           size="large"
           sx={{
-            position: 'absolute',
-            right: '.25rem',
-            top: '50%',
-            transform: 'translate(-25%, -50%)',
-            zIndex: '100',
-            color: 'white',
+            position: "absolute",
+            right: "-1.75rem",
+            top: "50%",
+            transform: "translate(-25%, -50%)",
+            zIndex: "100",
+            color: "white",
           }}
-          onClick={(e) => handleArrowClick(e, 'right')}
+          onClick={(e) => handleArrowClick(e, "right")}
           // onClick={(e) => console.log('I clicked the right button')}
         >
-          <ArrowCircleRightIcon sx={{ fontSize: '3rem' }} />
+          <ArrowCircleRightIcon sx={{ fontSize: "3rem" }} />
         </IconButton>
       </Box>
     </Fragment>

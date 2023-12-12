@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export type AppUser = {
   displayName: string | null;
   email: string;
@@ -17,8 +19,8 @@ export type TMDBErrorProps = {
 
 export type TimeDelayProp = number;
 
-export type MediaTypeProps = 'all' | 'movie' | 'tv' | 'person';
-export type MediaTimeWindowProps = 'day' | 'week';
+export type MediaTypeProps = "all" | "movie" | "tv" | "person";
+export type MediaTimeWindowProps = "day" | "week";
 
 type GenreProps = {
   id: number;
@@ -56,7 +58,7 @@ export type MediaProps = {
   id: number;
   title: string;
   posterPath: string;
-  mediaType: 'movie' | 'tv' | 'all' | 'person';
+  mediaType: "movie" | "tv" | "all" | "person";
 };
 
 export type MediaDetailsProps = {
@@ -64,7 +66,7 @@ export type MediaDetailsProps = {
   title: string;
   posterPath: string;
   backdropPath: string; // `width = 1920`
-  mediaType: 'movie' | 'tv' | 'all' | 'person';
+  mediaType: "movie" | "tv" | "all" | "person";
   originalLanguage?: string;
   // genre: number[];
   genre: string[]; // Get Details -> genres[].name
@@ -82,10 +84,29 @@ export type MediaDetailsProps = {
 };
 
 export interface MovieDetailsProps extends MediaDetailsProps {
-  mediaType: 'movie';
+  mediaType: "movie";
 }
 
-export type MediaCategories = 'trending' | 'popular' | 'upcoming';
+export type MediaCategories = "trending" | "popular" | "upcoming";
 
-export type SlideDirectionProps = 'left' | 'right' | 'up' | 'down' | undefined;
-export type ArrowClickProps = 'left' | 'right' | undefined;
+export type SlideDirectionProps = "left" | "right" | "up" | "down" | undefined;
+export type ArrowClickProps = "left" | "right" | undefined;
+
+export type LoginData = {
+  email: string;
+  password: string;
+};
+
+export type PageProps = {
+  [key: string]: string;
+};
+
+/*export type UserResponse = {
+  name: string;
+  email: string;
+  uid: string;
+}*/
+
+export type ChildrenProps = {
+  children?: ReactNode;
+};

@@ -1,47 +1,18 @@
 import { useState, useEffect, useContext, createContext } from 'react';
+import { auth } from '../firebase/firebase';
+// import { FirebaseError } from 'firebase/app';
+import { onAuthStateChanged, User as FirebaseUser, User } from 'firebase/auth';
+// import { Unsubscribe } from '@mui/icons-material';
+// import { date } from 'yup/lib/locale';
 
-import { auth, db } from '../firebase/firebase';
-import { FirebaseError } from 'firebase/app';
-import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  UserCredential,
-  User,
-} from 'firebase/auth';
-import {
-  collection,
-  doc,
-  addDoc,
-  setDoc,
-  getDocs,
-  Timestamp,
-} from 'firebase/firestore';
-import { Unsubscribe } from '@mui/icons-material';
-import { date } from 'yup/lib/locale';
-
-// type User = {
-//   uid: string;
-// } | null; // **temporary fix!!!
-type ErrorProps = {
+/*type ErrorProps = {
   code: string;
   message: string;
-};
+};*/
 
 type AuthContextHook = {
-  createUser: (
-    email: string,
-    password: string,
-    name: string,
-    photoURL: string
-  ) => Promise<void>;
-  logoutUser: () => Promise<void>;
-  isAuthenticating: boolean;
-  signinUser: (email: string, password: string) => Promise<void | ErrorProps>;
-  user: User | null; // should be type of User, which is unkown
-} | null;
+  currUser: FirebaseUser | null; // should be type of User, which is unkown
+};
 
 // type AuthContextType = unknown | null;
 
@@ -50,151 +21,28 @@ type AuthProviderProps = {
 };
 
 // create auth context
-const AuthContext = createContext<AuthContextHook>(null);
+const AuthContext = createContext<AuthContextHook | null>(null);
 
 // hook gives child components access to auth object
 export const useAuth = () => useContext(AuthContext);
 
-// provider hook creates auth object & handles state
+// provider hook creates auth object & handles state via Firebase Auth
 const useAuthProvider = () => {
-  const [user, setUser] = useState<User | null>(null); // ** temporary fix!!!
-  const [isAuthenticating, setIsAuthenticating] = useState(true);
-
-  const createUser = async (
-    email: string,
-    password: string,
-    name: string,
-    photoUrl: string = ''
-  ): Promise<void> => {
-    try {
-      const userCred = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const currUser = userCred?.user;
-      //.................setUser(currUser);
-      await updateProfile(currUser, { displayName: name, photoURL: photoUrl });
-      await setDoc(doc(db, 'users', currUser?.uid), {
-        email,
-        id: currUser?.uid,
-        name,
-        createdAt: Timestamp.now(),
-      });
-    } catch (error) {
-      if (error instanceof FirebaseError) {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-      }
-    }
-  };
-  // const createUser = (
-  //   email: string,
-  //   password: string,
-  //   name: string,
-  //   photoUrl: string = ''
-  // ) => {
-  //   return createUserWithEmailAndPassword(auth, email, password)
-  //     .then((userCredential) => {
-  //       // Signed in
-  //       // setUser(userCredential.user)
-  //       // setUser((prevState) => {
-  //       //   return { ...prevState, ...userCredential.user };
-  //       // });
-  //       // return user;
-  //       console.log(userCredential.user);
-  //       return updateProfile(userCredential.user, {
-  //         displayName: name,
-  //         photoURL: photoUrl,
-  //       });
-  //       // ...
-  //     })
-  //     .then(() => {
-  //       if (typeof user === 'object' && user !== null) {
-  //         console.log(user);
-  //         return setDoc(doc(db, 'users', user?.uid), {
-  //           email,
-  //           id: user?.uid,
-  //           name,
-  //           createdAt: Timestamp.now(),
-  //         });
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       const errorCode = error.code;
-  //       const errorMessage = error.message;
-  //       // ..
-  //     });
-  // };
-
-  const signinUser = (email: string, password: string) => {
-    return signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log(userCredential);
-        // User is signed in
-        // ......setUser(userCredential.user);
-        // return;
-      })
-      .catch((error): ErrorProps | undefined => {
-        if (error instanceof FirebaseError) {
-          console.error(error.code, error.message);
-          console.log(error.message);
-          return { code: error.code, message: error.message };
-          // const errorCode = error.code;
-          // const errorMessage = error.message;
-        }
-      });
-  };
-
-  const logoutUser = () => {
-    return signOut(auth)
-      .then(() => {
-        //...........setUser(null);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-      });
-  };
-
-  // const updateProfileUser = (
-  //   userName: string,
-  //   photoUrl: string,
-  //   phoneNumber: number
-  // ) => {
-  //   return updateProfile(auth?.currentUser, {
-  //     displayName: userName,
-  //     photoURL: photoUrl,
-  //     phoneNumber,
-  //   })
-  //     .then(() => {
-  //       //profile updated
-  //     })
-  //     .catch((error) => {
-  //       // error occured
-  //     });
-  // };
+  const [currUser, setCurrUser] = useState<FirebaseUser | null>(null); // ** temporary fix!!!
+  // const [isAuthenticating, setIsAuthenticating] = useState(true);
 
   // subscribe user on mount to have access to most recent
   // auth object, so that components can re-render appropriately
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) setIsAuthenticating(false);
-      else setIsAuthenticating(true);
+      setCurrUser(user);
     });
 
     // cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
-  const values = {
-    createUser,
-    logoutUser,
-    isAuthenticating,
-    signinUser,
-    user,
-  };
+  const values = { currUser };
   return values;
 };
 

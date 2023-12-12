@@ -21,6 +21,9 @@ export const getUIErrorMessage = (error: ErrorProps): string => {
     // case 'auth/invalid-password!':
     //   errorMessage = 'Password is invalid!';
     //  break;
+    case 'auth/missing-password':
+      errorMessage = 'Please enter valid password to update or delete account';
+      break;
     default:
       errorMessage = 'We are updating our servers, please try again later.';
   }

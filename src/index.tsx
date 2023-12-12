@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import store from './app/store';
 import { Provider } from 'react-redux';
+import { AuthProvider } from './hooks/useAuth';
 import reportWebVitals from './reportWebVitals';
 import LoadingSpinner from './components/LoadingSpinner';
 
@@ -15,10 +16,12 @@ const loaderRoot = document.getElementById('loader');
 
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <App />
-      {/* {(movieStatus === 'pending' || !movieArray) && <LoadingSpinner />} */}
-    </Provider>
+    <AuthProvider>
+      <Provider store={store}>
+        <App />
+        {/* {(movieStatus === 'pending' || !movieArray) && <LoadingSpinner />} */}
+      </Provider>
+    </AuthProvider>
   </React.StrictMode>
 );
 

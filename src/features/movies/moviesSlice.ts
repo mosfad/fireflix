@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import type { RootState } from '../../app/store';
-import axios from 'axios';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "../../app/store";
+import axios from "axios";
 import {
   TMDBErrorProps,
   MovieDetailsProps,
@@ -8,11 +8,11 @@ import {
   MediaProps,
   MediaDetailsProps,
   ActorProps,
-} from '../../shared/types';
-import { getLocalStore, saveLocalStore } from '../../utilities/localStorage';
-import { NumberSchema } from 'yup';
-import { mediaUrl } from '../../utilities/urlGenerator';
-import { Root } from 'react-dom/client';
+} from "../../shared/types";
+import { getLocalStore, saveLocalStore } from "../../utilities/localStorage";
+import { NumberSchema } from "yup";
+import { mediaUrl } from "../../utilities/urlGenerator";
+import { Root } from "react-dom/client";
 
 type GenreProps = {
   id: number;
@@ -66,7 +66,7 @@ type MediaCategoriesProps = {
 //   movies: MediaCategoriesProps | null;
 //   currentCategory: 'trending' | 'popular' | 'upcoming' | 'none' ;
 //   favorites: string[];
-//   status: 'idle' | 'pending' | 'suceeded' | 'failed';
+//   status: 'idle' | 'pending' | 'succeeded' | 'failed';
 //   error: string | null;
 // }
 
@@ -80,7 +80,7 @@ interface MovieState {
   moviesDetails: { [key: string]: MediaDetailsProps }[];
   currentMovieSelected: number | null;
   favorites: string[];
-  status: 'idle' | 'pending' | 'suceeded' | 'failed';
+  status: "idle" | "pending" | "succeeded" | "failed";
   error: string | null;
 }
 
@@ -94,7 +94,7 @@ const initialState: MovieState = {
   moviesDetails: [],
   currentMovieSelected: null,
   favorites: [],
-  status: 'idle',
+  status: "idle",
   error: null,
 };
 
@@ -102,11 +102,11 @@ const initialState: MovieState = {
 
 // Todo: fetch movies to display posters
 export const fetchTrendingMovies = createAsyncThunk(
-  'movies/fetchTrendingMovies',
+  "movies/fetchTrendingMovies",
   async (urlInfo: { url: string; category: MediaCategories }, thunkAPI) => {
     const isErrorResponse = (response: any): response is TMDBErrorProps => {
       //console.log(response);
-      return typeof response?.status_message === 'string';
+      return typeof response?.status_message === "string";
     };
     try {
       const response = await axios.get(urlInfo.url);
@@ -144,7 +144,7 @@ export const fetchTrendingMovies = createAsyncThunk(
 );
 
 export const fetchMovieDetails = createAsyncThunk(
-  'movies/fetchMovieDetails',
+  "movies/fetchMovieDetails",
   async (url: string, thunkAPI) => {
     // type guard function checks if response is an auth error
     // Create TMDB errorProps in types....!!!!!!
@@ -178,24 +178,24 @@ export const fetchMovieDetails = createAsyncThunk(
       const countryRatings: CountryRatingsProp =
         results.release_dates.results.find((country: CountryRatingsProp) => {
           // console.log(country);
-          return Object.values(country).includes('US'); // why didn't `country.iso_3166_1 === 'US'` work?????...........
+          return Object.values(country).includes("US"); // why didn't `country.iso_3166_1 === 'US'` work?????...........
         });
       console.log(countryRatings);
       const ratingsMedia = countryRatings?.release_dates[0]?.certification; // Tricky!!!!
 
       const trailerObj: VideoProps = results.videos.results.find(
         (videoObj: VideoProps) =>
-          videoObj.name.includes('Official') &&
-          videoObj.type === 'Trailer' &&
-          videoObj.site === 'YouTube'
+          videoObj.name.includes("Official") &&
+          videoObj.type === "Trailer" &&
+          videoObj.site === "YouTube"
       );
-      const trailer = trailerObj?.key || '';
+      const trailer = trailerObj?.key || "";
 
       // To do: casts.................................
       const actors: ActorProps[] = results.credits.cast
         .filter(
           (cast: CastProps) =>
-            cast.known_for_department === 'Acting' && cast.order < 30
+            cast.known_for_department === "Acting" && cast.order < 30
         )
         .map((actor: CastProps) => {
           return {
@@ -253,13 +253,13 @@ export const fetchMovieDetails = createAsyncThunk(
 );
 
 const moviesSlice = createSlice({
-  name: 'movies',
+  name: "movies",
   initialState,
   reducers: {
     // getAllMovies: (state, action: PayloadAction<>) => {
 
     // },
-
+    // TODO: Move the two reducers below to favoritesSlice....
     addMovieFav: (state, action: PayloadAction<string>) => {
       state.favorites.push(action.payload);
     },
@@ -278,10 +278,10 @@ const moviesSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchMovieDetails.pending, (state, action) => {
-        state.status = 'pending';
+        state.status = "pending";
       })
       .addCase(fetchMovieDetails.fulfilled, (state, action: any) => {
-        state.status = 'suceeded';
+        state.status = "succeeded";
         // state.movies = [];
 
         const movieSearch = state.moviesDetails.find((movie) =>
@@ -299,7 +299,7 @@ const moviesSlice = createSlice({
         // state.error = action.payload;
       })
       .addCase(fetchTrendingMovies.pending, (state, action) => {
-        state.status = 'pending';
+        state.status = "pending";
       })
       .addCase(fetchTrendingMovies.fulfilled, (state, action: any) => {
         if (
@@ -307,7 +307,7 @@ const moviesSlice = createSlice({
           state.movies.popular.length > 0 &&
           state.movies.upcoming.length > 0
         )
-          state.status = 'suceeded';
+          state.status = "succeeded";
         if (state.movies)
           state.movies[action.payload.category as MediaCategories] =
             action.payload.arrayMovies;
@@ -318,7 +318,7 @@ const moviesSlice = createSlice({
         //   state.movies[key as MediaCategories] = action.payload[key];
       })
       .addCase(fetchTrendingMovies.rejected, (state, action: any) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.payload;
       });
   },
@@ -443,7 +443,7 @@ export default moviesSlice.reducer;
 // interface MoviesState {
 //   movies: MovieDataProps;
 //   favorites: string[];
-//   status: 'idle' | 'pending' | 'suceeded' | 'failed';
+//   status: 'idle' | 'pending' | 'succeeded' | 'failed';
 //   error: string | null;
 // }
 
